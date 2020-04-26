@@ -1,0 +1,15 @@
+@       IN      SOA     bastion.%%LAB_DOMAIN%%. admin.%%LAB_DOMAIN%%. (
+                              3         ; Serial
+                         604800         ; Refresh
+                          86400         ; Retry
+                        2419200         ; Expire
+                         604800 )       ; Negative Cache TTL
+
+; name servers - NS records
+      IN      NS      lab-controller01.%%LAB_DOMAIN%%.
+
+; PTR Records
+10    IN      PTR     bastion.%%LAB_DOMAIN%%.
+49    IN      PTR     okd4-bootstrap.%%LAB_DOMAIN%%.
+50    IN      PTR     okd4-snc-master-0.%%LAB_DOMAIN%%. 
+

@@ -1,0 +1,15 @@
+zone "%%LAB_DOMAIN%%" {
+    type master;
+    file "/etc/named/zones/db.%%LAB_DOMAIN%%"; # zone file path
+};
+
+zone "11.10.10.in-addr.arpa" {
+    type master;
+    file "/etc/named/zones/db.10.10.11";
+};
+
+zone "sinkhole" {
+    type master;
+    file "/etc/named/zones/db.sinkhole"; allow-query {none;};
+};
+

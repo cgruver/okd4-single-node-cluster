@@ -1,0 +1,6 @@
+#!ipxe
+
+kernel %%INSTALL_URL%%/centos/isolinux/vmlinuz %%IP_CONFIG%% inst.ks=%%INSTALL_URL%%/kickstart/%%GUEST_ROLE%%.ks inst.repo=%%INSTALL_URL%%/centos console=ttyS0
+initrd %%INSTALL_URL%%/centos/isolinux/initrd.img
+
+boot

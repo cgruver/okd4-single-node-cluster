@@ -1,0 +1,24 @@
+@       IN      SOA     bastion.%%LAB_DOMAIN%%. admin.%%LAB_DOMAIN%%. (
+             3          ; Serial
+             604800     ; Refresh
+              86400     ; Retry
+            2419200     ; Expire
+             604800 )   ; Negative Cache TTL
+;
+; name servers - NS records
+    IN      NS     bastion.%%LAB_DOMAIN%%.
+
+; name servers - A records
+bastion.%%LAB_DOMAIN%%.         IN      A      10.10.11.10
+
+; 10.10.11.0/24 - A records
+nexus.%%LAB_DOMAIN%%.           IN      A      10.10.11.10
+okd4-snc-bootstrap.%%LAB_DOMAIN%%.  IN      A      10.10.11.49
+okd4-snc-master-0.%%LAB_DOMAIN%%.   IN      A      10.10.11.50
+etcd-0.%%LAB_DOMAIN%%.          IN      A      10.10.11.50
+*.apps.okd4-snc.%%LAB_DOMAIN%%.     IN      A      10.10.11.50
+api.okd4-snc.%%LAB_DOMAIN%%.        IN      A      10.10.11.50
+api-int.okd4-snc.%%LAB_DOMAIN%%.    IN      A      10.10.11.50
+
+_etcd-server-ssl._tcp.okd4-snc.%%LAB_DOMAIN%%    86400     IN    SRV     0    10    2380    etcd-0.okd4-snc.%%LAB_DOMAIN%%.
+

@@ -1,0 +1,30 @@
+apiVersion: v1
+baseDomain: %%LAB_DOMAIN%%
+metadata:
+  name: okd4-snc
+networking:
+  networkType: OpenShiftSDN
+  clusterNetwork:
+  - cidr: 10.100.0.0/14 
+    hostPrefix: 23 
+  serviceNetwork: 
+  - 172.30.0.0/16
+compute:
+- name: worker
+  replicas: 0
+controlPlane:
+  name: master
+  replicas: 1
+platform:
+  none: {}
+pullSecret: '%%PULL_SECRET%%'
+sshKey: %%SSH_KEY%%
+additionalTrustBundle: |
+
+imageContentSources:
+- mirrors:
+  - nexus.%%LAB_DOMAIN%%:5001/origin
+  source: registry.svc.ci.openshift.org/origin/%%OKD_VER%%
+- mirrors:
+  - nexus.%%LAB_DOMAIN%%:5001/origin
+  source: registry.svc.ci.openshift.org/origin/release
