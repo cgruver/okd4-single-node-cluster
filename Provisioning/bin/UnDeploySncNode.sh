@@ -25,5 +25,4 @@ virsh undefine ${HOSTNAME}
 virsh pool-destroy ${HOSTNAME}
 virsh pool-undefine ${HOSTNAME}
 rm -rf /VirtualMachines/${HOSTNAME}
-vbmc delete ${HOSTNAME}
 
