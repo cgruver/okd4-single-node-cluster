@@ -78,6 +78,8 @@ IP_01=$(dig ${HOSTNAME}.${LAB_DOMAIN} +short)
 
 # Create the OKD Node VM
 mkdir -p /VirtualMachines/${HOSTNAME}
+## virt-install --name ${HOSTNAME} --memory ${MEMORY} --vcpus ${CPU} --location ${INSTALL_URL}/centos --disk size=${DISK},path=/VirtualMachines/${HOSTNAME}/rootvol,bus=sata --extra-args=\"inst.ks=${KS} ip=${IP}::${LAB_GATEWAY}:${LAB_NETMASK}:${HOSTNAME}.${LAB_DOMAIN}:eth0:none nameserver=${LAB_NAMESERVER} console=tty0 console=ttyS0,115200n8\" --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0 --wait=-1 ${ARGS}
+
 virt-install --print-xml 1 --name ${HOSTNAME} --memory ${MEMORY} --vcpus ${CPU} --boot=hd,network,menu=on,useserial=on --disk size=${DISK},path=/VirtualMachines/${HOSTNAME}/rootvol,bus=sata --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0 > /VirtualMachines/${HOSTNAME}.xml
 virsh define /VirtualMachines/${HOSTNAME}.xml
 

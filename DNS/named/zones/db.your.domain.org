@@ -22,3 +22,9 @@ api-int.okd4-snc.%%LAB_DOMAIN%%.    IN      A      10.10.11.50
 
 _etcd-server-ssl._tcp.okd4-snc.%%LAB_DOMAIN%%    86400     IN    SRV     0    10    2380    etcd-0.okd4-snc.%%LAB_DOMAIN%%.
 
+; Comment these three lines after bootstrap is complete.
+*.apps.okd4-snc.%%LAB_DOMAIN%%.     IN      A      10.10.11.49
+api.okd4-snc.%%LAB_DOMAIN%%.        IN      A      10.10.11.49
+api-int.okd4-snc.%%LAB_DOMAIN%%.    IN      A      10.10.11.49
+
+
