@@ -49,7 +49,14 @@ openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir create ignition-config
 cp -r ${OKD4_SNC_PATH}/okd4-install-dir/*.ign ${INSTALL_ROOT}/fcos/ignition/
 chmod 644 ${INSTALL_ROOT}/fcos/ignition/*
 
+# Download FCOS images
+curl -o ${INSTALL_ROOT}/fcos/vmlinuz https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-kernel-x86_64
+curl -o ${INSTALL_ROOT}/fcos/initrd https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-initramfs.x86_64.img
+curl -o ${INSTALL_ROOT}/fcos/install.xz https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-metal.x86_64.raw.xz
+curl -o ${INSTALL_ROOT}/fcos/install.xz.sig https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-metal.x86_64.raw.xz.sig
 curl -o /tmp/fcos.iso https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live.x86_64.iso
+
+# Prepare FCOS boot ISO
 mkdir /tmp/{fcos-iso,fcos}
 mount -o loop /tmp/fcos.iso /tmp/fcos-iso
 rsync -av /tmp/fcos-iso/ /tmp/fcos/
@@ -68,27 +75,6 @@ default vesamenu.c32
 timeout 1
 display boot.msg
 menu clear
-menu background splash.png
-menu title Fedora CoreOS
-menu vshift 8
-menu rows 18
-menu margin 8
-menu helpmsgrow 15
-menu tabmsgrow 13
-menu color border * #00000000 #00000000 none
-menu color sel 0 #ffffffff #00000000 none
-menu color title 0 #ff7ba3d0 #00000000 none
-menu color tabmsg 0 #ff3a6496 #00000000 none
-menu color unsel 0 #84b8ffff #00000000 none
-menu color hotsel 0 #84b8ffff #00000000 none
-menu color hotkey 0 #ffffffff #00000000 none
-menu color help 0 #ffffffff #00000000 none
-menu color scrollbar 0 #ffffffff #ff355594 none
-menu color timeout 0 #ffffffff #00000000 none
-menu color timeout_msg 0 #ffffffff #00000000 none
-menu color cmdmark 0 #84b8ffff #00000000 none
-menu color cmdline 0 #ffffffff #00000000 none
-menu tabmsg Press Tab for full configuration options on menu items.
 menu separator
 label linux
   menu label ^Fedora CoreOS (Live)
@@ -117,27 +103,6 @@ default vesamenu.c32
 timeout 1
 display boot.msg
 menu clear
-menu background splash.png
-menu title Fedora CoreOS
-menu vshift 8
-menu rows 18
-menu margin 8
-menu helpmsgrow 15
-menu tabmsgrow 13
-menu color border * #00000000 #00000000 none
-menu color sel 0 #ffffffff #00000000 none
-menu color title 0 #ff7ba3d0 #00000000 none
-menu color tabmsg 0 #ff3a6496 #00000000 none
-menu color unsel 0 #84b8ffff #00000000 none
-menu color hotsel 0 #84b8ffff #00000000 none
-menu color hotkey 0 #ffffffff #00000000 none
-menu color help 0 #ffffffff #00000000 none
-menu color scrollbar 0 #ffffffff #ff355594 none
-menu color timeout 0 #ffffffff #00000000 none
-menu color timeout_msg 0 #ffffffff #00000000 none
-menu color cmdmark 0 #84b8ffff #00000000 none
-menu color cmdline 0 #ffffffff #00000000 none
-menu tabmsg Press Tab for full configuration options on menu items.
 menu separator
 label linux
   menu label ^Fedora CoreOS (Live)
