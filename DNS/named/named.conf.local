@@ -8,8 +8,3 @@ zone "11.10.10.in-addr.arpa" {
     file "/etc/named/zones/db.10.10.11";
 };
 
-zone "sinkhole" {
-    type master;
-    file "/etc/named/zones/db.sinkhole"; allow-query {none;};
-};
-

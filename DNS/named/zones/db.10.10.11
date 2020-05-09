@@ -1,4 +1,4 @@
-@       IN      SOA     bastion.%%LAB_DOMAIN%%. admin.%%LAB_DOMAIN%%. (
+@       IN      SOA     snc-host.%%SNC_DOMAIN%%. admin.%%SNC_DOMAIN%%. (
                               3         ; Serial
                          604800         ; Refresh
                           86400         ; Retry
@@ -6,10 +6,10 @@
                          604800 )       ; Negative Cache TTL
 
 ; name servers - NS records
-      IN      NS      lab-controller01.%%LAB_DOMAIN%%.
+      IN      NS      snc-host.%%SNC_DOMAIN%%.
 
 ; PTR Records
-10    IN      PTR     bastion.%%LAB_DOMAIN%%.
-49    IN      PTR     okd4-bootstrap.%%LAB_DOMAIN%%.
-50    IN      PTR     okd4-snc-master-0.%%LAB_DOMAIN%%. 
+10    IN      PTR     bastion.%%SNC_DOMAIN%%.
+49    IN      PTR     okd4-bootstrap.%%SNC_DOMAIN%%.
+50    IN      PTR     okd4-snc-master.%%SNC_DOMAIN%%. 
 
