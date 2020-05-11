@@ -89,7 +89,7 @@ mkisofs -o /tmp/bootstrap.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-
 
 # Create the Bootstrap Node VM
 mkdir -p /VirtualMachines/okd4-bootstrap
-virt-install --name okd4-bootstrap --memory ${MEMORY} --vcpus ${CPU} --disk size=${DISK},path=/VirtualMachines/okd4-bootstrap/rootvol,bus=sata --cdrom /tmp/bootstrap.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
+virt-install --name okd4-bootstrap --memory 14336 --vcpus 2 --disk size=100,path=/VirtualMachines/okd4-bootstrap/rootvol,bus=sata --cdrom /tmp/bootstrap.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
 
 IP=""
 

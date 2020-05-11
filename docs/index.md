@@ -2,8 +2,6 @@
 
 ## Host setup:
 
-I am using a [NUC8i3BEK](https://ark.intel.com/content/www/us/en/ark/products/126149/intel-nuc-kit-nuc8i3bek.html) with 32GB of RAM for my host. This little box with 32GB of RAM is perfect for this purpose, and also very portable for throwing in a bag to take my dev environment with me.
-
 You need to start with a minimal CentOS 7 install.
 
     wget https://buildlogs.centos.org/rolling/7/isos/x86_64/CentOS-7-x86_64-Minimal.iso
@@ -13,11 +11,11 @@ Use a tool like [balenaEtcher](https://www.balena.io/etcher/) to create a bootab
 You will have to attach monitor, mouse, and keyboard to your NUC for the install.  After the install, this machine can be headless.
 
 * Network:
-    * Configure the network interface with a fixed IP address, `10.11.11.10` if you are following this guide.  Otherwise, use the conventions of your local network.
-    * Set the system hostname to `snc-host`
+    1. Configure the network interface with a fixed IP address, `10.11.11.10` if you are following this guide.  Otherwise, use the conventions of your local network.
+    1. Set the system hostname to `snc-host`
 * Storage:
-    * Take the default sizes for /boot and swap.
-    * Do not create a `/home` filesystem (no users on this system)
+    1. Take the default sizes for /boot and swap.
+    1. Do not create a `/home` filesystem (no users on this system)
     Allocate all of the remaining space for the `/` filesystem
 
 After the installation completes, ensure that you can ssh to your host.
@@ -246,7 +244,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
         But much longer...
     1. We need to put the pull secret into a JSON file that we will use to set up the install-config.yaml file.
 
-           echo "PASTE THE COPIED BASE64 STRING HERE" | base64 -d > ${OKD4_LAB_PATH}/pull_secret.json 
+           echo "PASTE THE COPIED BASE64 STRING HERE" | base64 -d > ${OKD4_SNC_PATH}/pull_secret.json 
 
 1. We need to configure the environment to pull a current version of OKD.  So point your browser at `https://origin-release.svc.ci.openshift.org`.  
 
@@ -261,7 +259,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
     I have prepared a skeleton file for you in this project, `./install-config-snc.yaml`.
 
        apiVersion: v1
-       baseDomain: %%LAB_DOMAIN%%
+       baseDomain: %%SNC_DOMAIN%%
        metadata:
          name: okd4-snc
        networking:
@@ -284,15 +282,15 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     Copy this file to our working directory.
 
-        cp ./Provisioning/install-config-upi.yaml ${OKD4_LAB_PATH}/install-config-snc.yaml
+        cp ./Provisioning/install-config-upi.yaml ${OKD4_SNC_PATH}/install-config-snc.yaml
 
     Patch in some values:
 
-        sed -i "s|%%LAB_DOMAIN%%|${LAB_DOMAIN}|g" ${OKD4_LAB_PATH}/install-config-snc.yaml
-        SECRET=$(cat ${OKD4_LAB_PATH}/pull-secret.json)
-        sed -i "s|%%PULL_SECRET%%|${SECRET}|g" ${OKD4_LAB_PATH}/install-config-snc.yaml
+        sed -i "s|%%SNC_DOMAIN%%|${SNC_DOMAIN}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
+        SECRET=$(cat ${OKD4_SNC_PATH}/pull-secret.json)
+        sed -i "s|%%PULL_SECRET%%|${SECRET}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
         SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
-        sed -i "s|%%SSH_KEY%%|${SSH_KEY}|g" ${OKD4_LAB_PATH}/install-config-upi.yaml
+        sed -i "s|%%SSH_KEY%%|${SSH_KEY}|g" ${OKD4_SNC_PATH}/install-config-upi.yaml
 
     Your install-config-upi.yaml file should now look something like:
 
@@ -321,7 +319,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 1. Set a couple of environment variables that the `DeployOkdSnc` script will use for Fedora CoreOS installation. 
 
     In a browser, go to: `https://getfedora.org/en/coreos/download/`
-    
+
     Make sure you are on the `stable` Stream, select the `Bare Metal & Virtualized` tab, and make note of the current version. 
 
     ![FCOS Download Page](images/FCOS-Download.png)
@@ -336,18 +334,50 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
 1. Create the cluster virtual machines and start the OKD installation:
 
-       DeployOkdNodes.sh -i=${OKD4_LAB_PATH}/guest-inventory/okd4 -p -m -d1
+       DeployOkdSnc.sh
 
-    This script does a whole lot of work for you.
+    This script does a whole lot of work for you:
 
     1. It will pull the current versions of `oc` and `openshift-install` based on the value of `${OKD_RELEASE}` that we set previously.
-    1. fills in the OKD version in the install-config-upi.yaml file and copies that file to the install directory as install-config.yaml.
+    1. Copies the install-config-snc.yaml file to the install directory as install-config.yaml.
     1. Invokes the openshift-install command against our install-config to produce ignition files
     1. Copies the ignition files into place for FCOS install
-    1. Sets up for a mirrored install by putting `registry.svc.ci.openshift.org` into a DNS sinkhole.
-    1. Creates guest VMs for the Boostrap and Master nodes
+    1. Pulls the requested Fedora CoreOS release based on the values of `${FCOS_VER}` and `${FCOS_STREAM}`
+    1. Creates a bootable ISO for the Bootstrap and Master nodes with a customized `isolinux.cfg` file.
+    1. Creates the guest VMs for the Boostrap and Master nodes.
+    1. Starts the VMs and begins the installation process.
 
 ### Now let's sit back and watch the install:
+
+1. In a separate terminal, execute the following to monitor the Bootstrap progress:
+
+       openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for bootstrap-complete --log-level debug
+
+    __We are waiting for the API to be available so that we can inject a setting to allow for a single node cluster to run:__
+
+
+1. When you see the following message, execute the following commands:
+
+    __API Message Here__
+
+       export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
+       oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableEtcd": true}}}' --type=merge
+
+    If the command fails, try it again until it succeeds.  The `etcd` operator config may not be available for patching right away.
+
+1. Now, wait for the bootstrap to complete:
+
+       openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for bootstrap-complete --log-level debug
+
+1. When the Bootstrap process is complete, destroy the Bootstrap node.
+
+       DestroyBootstrap.sh
+
+1. Now, watch the installation process through to completion:
+
+       openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for install-complete --log-level debug
+
+### Watching Bootstrap and Install processes in detail:
 
 To watch a node boot and install:
 
@@ -368,26 +398,13 @@ Once a host has installed FCOS you can monitor the install logs:
 
        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-master-0 "journalctl -b -f -u kubelet.service"
 
-Monitor OKD install progress:
+### If it all goes pancake shaped:
 
-  * Bootstrap Progress:
+Gather logs from the bootstrap and master nodes:
 
-        openshift-install --dir=${OKD4_LAB_PATH}/okd4-install-dir wait-for bootstrap-complete --log-level debug
+    openshift-install --dir=okd4-install gather bootstrap --bootstrap 10.11.11.49 --master 10.11.11.50
 
-  * When bootstrap is complete, remove the bootstrap node from HA-Proxy
-
-        ssh root@okd4-lb01 "cat /etc/haproxy/haproxy.cfg | grep -v bootstrap > /etc/haproxy/haproxy.tmp && mv /etc/haproxy/haproxy.tmp /etc/haproxy/haproxy.cfg && systemctl restart haproxy.service"
-
-    Destroy the Bootstrap Node on the Bastion host:
-
-        virsh destroy okd4-bootstrap
-        vbmc delete okd4-bootstrap
-
-  * Install Progress:
-
-        openshift-install --dir=${OKD4_LAB_PATH}/okd4-install-dir wait-for install-complete --log-level debug
-
-* Install Complete:
+## Install Complete:
 
     You will see output that looks like:
 
@@ -396,34 +413,24 @@ Monitor OKD install progress:
       DEBUG Route found in openshift-console namespace: downloads 
       DEBUG OpenShift console route is created           
       INFO Install complete!                            
-      INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/root/okd4-lab/okd4-install-dir/auth/kubeconfig' 
-      INFO Access the OpenShift web-console here: https://console-openshift-console.apps.okd4.your.domain.org 
+      INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/root/okd4-snc/okd4-install-dir/auth/kubeconfig' 
+      INFO Access the OpenShift web-console here: https://console-openshift-console.apps.okd4-snc.your.domain.org 
       INFO Login to the console with user: kubeadmin, password: aBCdE-FGHiJ-klMNO-PqrSt
 
 ### Log into your new cluster console:
 
-Point your browser to the url listed at the completion of install: `https://console-openshift-console.apps.okd4.your.domain.org`
+Point your browser to the url listed at the completion of install: `https://console-openshift-console.apps.okd4-snc.your.domain.org`
 Log in as `kubeadmin` with the password from the output at the completion of the install.
 
-__If you forget the password for this initial account, you can find it in the file: `${OKD4_LAB_PATH}/okd4-install-dir/auth/kubeadmin-password`
+__If you forget the password for this initial account, you can find it in the file: `${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password`
 
 ### Issue commands against your new cluster:
 
-    export KUBECONFIG="${OKD4_LAB_PATH}/okd4-install-dir/auth/kubeconfig"
+    export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
     oc get pods --all-namespaces
-
-You may need to approve the certs of you master and or worker nodes before they can join the cluster:
-
-    oc get csr
-
-If you see certs in a Pending state:
-
-    oc get csr -ojson | jq -r '.items[] | select(.status == {} ) | .metadata.name' | xargs oc adm certificate approve
 
 Create an Empty volume for registry storage:
 
     oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
 
-### If it all goes pancake shaped:
 
-    openshift-install --dir=okd4-install gather bootstrap --bootstrap 10.11.11.49 --master 10.11.11.60 --master 10.11.11.61 --master 10.11.11.62
