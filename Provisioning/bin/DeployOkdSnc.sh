@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -x
+
 # This script will set up the infrastructure to deploy a single node OKD 4.X cluster
 PULL_RELEASE=false
 USE_MIRROR=false
@@ -80,7 +82,7 @@ label linux
   menu label ^Fedora CoreOS (Live)
   menu default
   kernel /images/vmlinuz
-  append initrd=/images/initramfs.img "ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-bootstrap.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER}" rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=sda coreos.inst.image_url=${INSTALL_URL}/fcos/install.xz coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/bootstrap.ign coreos.inst.platform_id=qemu console=ttyS0
+  append initrd=/images/initramfs.img ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-bootstrap.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=sda coreos.inst.image_url=${INSTALL_URL}/fcos/install.xz coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/bootstrap.ign coreos.inst.platform_id=qemu console=ttyS0
 menu separator
 menu end
 EOF

@@ -426,6 +426,27 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
     1. Creates the guest VMs for the Boostrap and Master nodes.
     1. Starts the VMs and begins the installation process.
 
+1. Because the `DeployOkdSnc.sh` script disconnects from the VM before installation completes, the VM will not restart after the Fedora CoreOS installation.  The VMs will shutdown instead.
+
+    You can watch the install:
+
+       virsh console okd4-snc-bootstrap
+       virsh console okd4-snc-master
+    
+    When the install is complete, the VMs will be shutdown:
+
+       virsh list --all
+
+        Id    Name                           State
+       ----------------------------------------------------
+        -     okd4-snc-bootstrap             shut off
+        -     okd4-snc-master                shut off
+
+1. Restart the VMs to begin the OKD Cluster installation:
+
+       virsh start okd4-snc-bootstrap
+       virsh start okd4-snc-master
+
 ### Now let's sit back and watch the install:
 
 1. In a separate terminal, execute the following to monitor the Bootstrap progress:
