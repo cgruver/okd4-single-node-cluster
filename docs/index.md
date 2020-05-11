@@ -456,14 +456,27 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
     __We are waiting for the API to be available so that we can inject a setting to allow for a single node cluster to run:__
 
 
-1. When you see the following message, execute the following commands:
+1. When you see the following message... 
 
-    __API Message Here__
+       INFO API v1.17.1 up                               
+       INFO Waiting up to 40m0s for bootstrapping to complete... 
+
+    execute the following commands:
 
        export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
        oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableEtcd": true}}}' --type=merge
 
     If the command fails, try it again until it succeeds.  The `etcd` operator config may not be available for patching right away.
+
+    You might see errors like:
+
+       error: the server doesn't have a resource type "etcd"
+    
+    Or:
+
+       Error from server (NotFound): etcds.operator.openshift.io "cluster" not found
+
+    Keep trying, it should succeed in a minute or two at most.
 
 1. Now, wait for the bootstrap to complete:
 
