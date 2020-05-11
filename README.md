@@ -1,8 +1,6 @@
 # okd4-single-node-cluster
 Building an OKD4 cluster with minimal resources
 
-### Work In Progress.  Documentation is incomplete.  Check back often.
-
 This tutorial will guide you through deploying an OKD 4.4 cluster that is as minimal as possible.  It will consist of one node which is both master and worker.
 
 You will need a CentOS 7 linux host with 2 cores and at least 32GB of RAM.
