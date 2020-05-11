@@ -36,6 +36,54 @@ Install packages and set up KVM:
     virsh pool-autostart default
     virsh pool-start default
 
+Set up bridged networking: 
+
+The following assumes that your NIC is `eno1`
+
+Create a bridge device named `br0` over the primary NIC.  Substitute your IP configuration below.
+
+1. Edit /etc/sysconfig/network-scripts/ifcfg-br0
+
+       STP="yes"
+       BRIDGING_OPTS="priority=32768"
+       TYPE="Bridge"
+       PROXY_METHOD="none"
+       BROWSER_ONLY="no"
+       BOOTPROTO="none"
+       IPADDR="10.11.11.10"      # This should be the IP address of your snc-host
+       PREFIX="24"
+       GATEWAY="10.11.11.1"      # This should be the IP address of your router
+       DNS1="10.11.11.1"         # This should be the IP address of your router, or external DNS server
+       DEFROUTE="yes"
+       IPV4_FAILURE_FATAL="no"
+       IPV6INIT="no"
+       NAME="br0"
+       DEVICE="br0"
+       ONBOOT="yes"
+
+1. Edit /etc/sysconfig/network-scripts/ifcfg-br0_slave_1
+
+       TYPE="Ethernet"
+       NAME="br0 slave 1"
+       DEVICE="eno1"
+       ONBOOT="yes"
+       BRIDGE="br0"
+
+1. Edit /etc/sysconfig/network-scripts/ifcfg-eno1
+
+       NAME=eno1
+       DEVICE=eno1
+       ONBOOT=no
+       NETBOOT=yes
+       IPV6INIT=no
+       TYPE=Ethernet
+       PROXY_METHOD=none
+       BROWSER_ONLY=no
+
+1. Restart networking and make sure everything is working properly:
+
+       systemctl restart network.service
+
 Create an SSH key pair: (Take the defaults for all of the prompts, don't set a key password)
 
     ssh-keygen
@@ -160,7 +208,34 @@ Now that we are done with the configuration let's enable DNS and start it up.
     systemctl enable named
     systemctl start named
 
-You can now test DNS resolution.  Try some `ping` or `dig` commands.
+Finally, we need to configure the `snc-host` to use the new DNS server
+
+1. Edit /etc/sysconfig/network-scripts/ifcfg-br0 and change the DNS entry to reflect the IP address of the `snc-host`
+
+       STP="yes"
+       BRIDGING_OPTS="priority=32768"
+       TYPE="Bridge"
+       PROXY_METHOD="none"
+       BROWSER_ONLY="no"
+       BOOTPROTO="none"
+       IPADDR="10.11.11.10"
+       PREFIX="24"
+       GATEWAY="10.11.11.1"
+       DNS1="10.11.11.10"          # This line should now be the IP address of this host.
+       DEFROUTE="yes"
+       IPV4_FAILURE_FATAL="no"
+       IPV6INIT="no"
+       NAME="br0"
+       DEVICE="br0"
+       ONBOOT="yes"
+
+1. Restart networking and make sure everything is working properly:
+
+       systemctl restart network.service
+
+1. You can now test DNS resolution.  Try some `ping` or `dig` commands.
+
+       ping redhat.com
 
 ### __Hugely Helpful Tip:__
 
