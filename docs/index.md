@@ -110,7 +110,7 @@ Disconnect the keyboard, mouse, and display.  Your host is now headless.
 1. Copy the utility scripts to your local `bin` directory:
 
        mkdir ~/bin
-       cp ./Provisioning/bin/* ~/bin
+       cp ./bin/* ~/bin
        chmod 750 ~/bin/*
 
     Ensure that `~/bin` is in your $PATH.  Modify ~/.bashrc if necessary.
@@ -453,6 +453,12 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
        openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for bootstrap-complete --log-level debug
 
+    You will see output similar to:
+
+       DEBUG OpenShift Installer 4.4.0-0.okd-2020-05-11-020031 
+       DEBUG Built from commit 4cb9ca89c59cbc7e5b4caf3863e098057b496a15 
+       INFO Waiting up to 20m0s for the Kubernetes API at https://api.okd4-snc.snc.test:6443... 
+
     __We are waiting for the API to be available so that we can inject a setting to allow for a single node cluster to run:__
 
 
@@ -490,6 +496,12 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
        openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for install-complete --log-level debug
 
+    You will see output similar to:
+
+       INFO Waiting up to 30m0s for the cluster at https://api.okd4-snc.snc.test:6443 to initialize... 
+       DEBUG Still waiting for the cluster to initialize: Working towards 4.4.0-0.okd-2020-05-11-020031: 76% complete 
+
+
 ### Watching Bootstrap and Install processes in detail:
 
 To watch a node boot and install:
@@ -509,7 +521,7 @@ Once a host has installed FCOS you can monitor the install logs:
 
 * Master Node:
 
-       ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-master-0 "journalctl -b -f -u kubelet.service"
+       ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-master "journalctl -b -f -u kubelet.service"
 
 ### If it all goes pancake shaped:
 
