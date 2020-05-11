@@ -3,8 +3,8 @@ zone "%%LAB_DOMAIN%%" {
     file "/etc/named/zones/db.%%LAB_DOMAIN%%"; # zone file path
 };
 
-zone "11.10.10.in-addr.arpa" {
+zone "11.11.10.in-addr.arpa" {
     type master;
-    file "/etc/named/zones/db.10.10.11";
+    file "/etc/named/zones/db.10.11.11";
 };
 

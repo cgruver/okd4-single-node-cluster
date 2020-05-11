@@ -157,7 +157,7 @@ __If you set up your router for the 10.11.11/24 network, then you can use the ex
 Do the following, from the root of this project:
 
     cp ./DNS/named.conf /etc
-    cp ./DNS/named /etc
+    cp -r ./DNS/named /etc
     
     mv /etc/named/zones/db.domain.records /etc/named/zones/db.${SNC_DOMAIN}
     sed -i "s|%%SNC_DOMAIN%%|${SNC_DOMAIN}|g" /etc/named/named.conf.local
