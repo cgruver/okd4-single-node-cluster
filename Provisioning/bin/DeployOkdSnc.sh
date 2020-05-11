@@ -66,7 +66,7 @@ rm -f /tmp/fcos.iso
 
 # Get IP address for Bootstrap Node
 IP=""
-IP=$(dig okd4-bootstrap.${SNC_DOMAIN} +short)
+IP=$(dig okd4-snc-bootstrap.${SNC_DOMAIN} +short)
 
 # Create ISO Image for Bootstrap
 cat << EOF > /tmp/fcos/isolinux/isolinux.cfg
@@ -88,8 +88,8 @@ EOF
 mkisofs -o /tmp/bootstrap.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -r /tmp/fcos/
 
 # Create the Bootstrap Node VM
-mkdir -p /VirtualMachines/okd4-bootstrap
-virt-install --name okd4-bootstrap --memory 14336 --vcpus 2 --disk size=100,path=/VirtualMachines/okd4-bootstrap/rootvol,bus=sata --cdrom /tmp/bootstrap.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
+mkdir -p /VirtualMachines/okd4-snc-bootstrap
+virt-install --name okd4-snc-bootstrap --memory 14336 --vcpus 2 --disk size=100,path=/VirtualMachines/okd4-snc-bootstrap/rootvol,bus=sata --cdrom /tmp/bootstrap.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
 
 IP=""
 

@@ -195,9 +195,9 @@ In the example file, there are some entries to take note of:
 
 When you have completed all of your configuration changes, you can test the configuration with the following command:
 
-        named-checkconf
+    named-checkconf
 
-    If the output is clean, then you are ready to fire it up!
+If the output is clean, then you are ready to fire it up!
 
 ### Starting DNS
 
@@ -467,7 +467,7 @@ To watch a node boot and install:
 Once a host has installed FCOS you can monitor the install logs:
 * Bootstrap Node:
 
-       ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-bootstrap "journalctl -b -f -u bootkube.service"
+       ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-bootstrap "journalctl -b -f -u bootkube.service"
 
 * Master Node:
 

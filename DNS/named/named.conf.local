@@ -1,6 +1,6 @@
-zone "%%LAB_DOMAIN%%" {
+zone "%%SNC_DOMAIN%%" {
     type master;
-    file "/etc/named/zones/db.%%LAB_DOMAIN%%"; # zone file path
+    file "/etc/named/zones/db.%%SNC_DOMAIN%%"; # zone file path
 };
 
 zone "11.11.10.in-addr.arpa" {

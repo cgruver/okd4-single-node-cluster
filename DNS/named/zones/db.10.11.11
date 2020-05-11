@@ -10,6 +10,5 @@
 
 ; PTR Records
 10    IN      PTR     snc-host.%%SNC_DOMAIN%%.
-49    IN      PTR     okd4-bootstrap.%%SNC_DOMAIN%%.
+49    IN      PTR     okd4-snc-bootstrap.%%SNC_DOMAIN%%.
 50    IN      PTR     okd4-snc-master.%%SNC_DOMAIN%%. 
-
