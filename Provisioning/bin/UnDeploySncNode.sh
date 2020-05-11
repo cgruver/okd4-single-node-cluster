@@ -1,22 +1,9 @@
 #!/bin/bash
 
-for i in "$@"
-do
-  case $i in
-    -h=*|--hostname=*)
-    HOSTNAME="${i#*=}"
-    shift # past argument=value
-    ;;
-    *)
-          # unknown option
-    ;;
-  esac
-done
-
 # Destroy the VM
-virsh destroy ${HOSTNAME}
-virsh undefine ${HOSTNAME}
-virsh pool-destroy ${HOSTNAME}
-virsh pool-undefine ${HOSTNAME}
-rm -rf /VirtualMachines/${HOSTNAME}
+virsh destroy okd4-snc-master
+virsh undefine okd4-snc-master
+virsh pool-destroy okd4-snc-master
+virsh pool-undefine okd4-snc-master
+rm -rf /VirtualMachines/okd4-snc-master
 

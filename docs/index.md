@@ -288,12 +288,16 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     Go to: `https://github.com/openshift/okd/releases/tag/4.4.0-0.okd-2020-01-28-022517` and retrieve the `openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz` archive.
 
+       cd ${OKD4_SNC_PATH}
        wget https://github.com/openshift/okd/releases/download/4.4.0-0.okd-2020-01-28-022517/openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
 
 1. Uncompress the archive and move the `oc` executable to your ~/bin directory.
 
        tar -xzf openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
        mv oc ~/bin
+       mv kubectl ~/bin
+       rm -f openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
+       rm -f README.md
 
     The `DeployOkdSnc.sh` script will pull the correct version of `oc` and `openshift-install` when we run it.  It will over-write older versions in `~/bin`.
 
@@ -357,7 +361,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     Copy this file to our working directory.
 
-        cp ./Provisioning/install-config-upi.yaml ${OKD4_SNC_PATH}/install-config-snc.yaml
+        cp ./install-config-snc.yaml ${OKD4_SNC_PATH}/install-config-snc.yaml
 
     Patch in some values:
 
@@ -365,9 +369,9 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
         SECRET=$(cat ${OKD4_SNC_PATH}/pull-secret.json)
         sed -i "s|%%PULL_SECRET%%|${SECRET}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
         SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
-        sed -i "s|%%SSH_KEY%%|${SSH_KEY}|g" ${OKD4_SNC_PATH}/install-config-upi.yaml
+        sed -i "s|%%SSH_KEY%%|${SSH_KEY}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
 
-    Your install-config-upi.yaml file should now look something like:
+    Your install-config-snc.yaml file should now look something like:
 
        apiVersion: v1
        baseDomain: your.domain.org
