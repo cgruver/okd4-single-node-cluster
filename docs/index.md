@@ -502,7 +502,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
        DEBUG Still waiting for the cluster to initialize: Working towards 4.4.0-0.okd-2020-05-11-020031: 76% complete 
 
 
-### Watching Bootstrap and Install processes in detail:
+### Watching Bootstrap and Install processes in more detail:
 
 To watch a node boot and install:
 
@@ -515,6 +515,7 @@ To watch a node boot and install:
        virsh console okd4-snc-master
 
 Once a host has installed FCOS you can monitor the install logs:
+
 * Bootstrap Node:
 
        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-bootstrap "journalctl -b -f -u bootkube.service"
@@ -523,7 +524,7 @@ Once a host has installed FCOS you can monitor the install logs:
 
        ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-master "journalctl -b -f -u kubelet.service"
 
-### If it all goes pancake shaped:
+### If it all goes pancake shaped during the install:
 
 Gather logs from the bootstrap and master nodes:
 
@@ -554,7 +555,18 @@ __If you forget the password for this initial account, you can find it in the fi
     export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
     oc get pods --all-namespaces
 
-Create an Empty volume for registry storage:
+## Set up htpasswd Authentication:
+
+    mkdir -p ${OKD4_SNC_PATH}/okd-creds
+    htpasswd -B -c -b ${OKD4_SNC_PATH}/okd-creds/htpasswd admin $(cat ${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password)
+    htpasswd -b ${OKD4_SNC_PATH}/okd-creds/htpasswd devuser devpwd
+    oc create -n openshift-config secret generic htpasswd-secret --from-file=htpasswd=${OKD4_SNC_PATH}/okd-creds/htpasswd
+    oc apply -f ${OKD4_LAB_PATH}/htpasswd-cr.yml
+    oc adm policy add-cluster-role-to-user cluster-admin admin
+
+    oc delete secrets kubeadmin -n kube-system
+
+### Create an Empty volume for registry storage:
 
     oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
 
