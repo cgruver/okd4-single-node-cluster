@@ -36,54 +36,6 @@ Install packages and set up KVM:
     virsh pool-autostart default
     virsh pool-start default
 
-Set up bridged networking: 
-
-The following assumes that your NIC is `eno1`
-
-Create a bridge device named `br0` over the primary NIC.  Substitute your IP configuration below.
-
-1. Edit /etc/sysconfig/network-scripts/ifcfg-br0
-
-       STP="yes"
-       BRIDGING_OPTS="priority=32768"
-       TYPE="Bridge"
-       PROXY_METHOD="none"
-       BROWSER_ONLY="no"
-       BOOTPROTO="none"
-       IPADDR="10.11.11.10"      # This should be the IP address of your snc-host
-       PREFIX="24"
-       GATEWAY="10.11.11.1"      # This should be the IP address of your router
-       DNS1="10.11.11.1"         # This should be the IP address of your router, or external DNS server
-       DEFROUTE="yes"
-       IPV4_FAILURE_FATAL="no"
-       IPV6INIT="no"
-       NAME="br0"
-       DEVICE="br0"
-       ONBOOT="yes"
-
-1. Edit /etc/sysconfig/network-scripts/ifcfg-br0_slave_1
-
-       TYPE="Ethernet"
-       NAME="br0 slave 1"
-       DEVICE="eno1"
-       ONBOOT="yes"
-       BRIDGE="br0"
-
-1. Edit /etc/sysconfig/network-scripts/ifcfg-eno1
-
-       NAME=eno1
-       DEVICE=eno1
-       ONBOOT=no
-       NETBOOT=yes
-       IPV6INIT=no
-       TYPE=Ethernet
-       PROXY_METHOD=none
-       BROWSER_ONLY=no
-
-1. Restart networking and make sure everything is working properly:
-
-       systemctl restart network.service
-
 Create an SSH key pair: (Take the defaults for all of the prompts, don't set a key password)
 
     ssh-keygen
@@ -130,8 +82,7 @@ Disconnect the keyboard, mouse, and display.  Your host is now headless.
     | `INSTALL_ROOT` | `/usr/share/nginx/html/install` | The directory that will hold Fedora CoreOS install images |
     | `INSTALL_URL` | `http://${SNC_HOST}/install` | The URL for Fedora CoreOS installation |
     | `OKD4_SNC_PATH` | `/root/okd4-snc` | The path from which we will build our OKD4 cluster |
-    | `OKD_REGISTRY` | `registry.svc.ci.openshift.org/origin/release` | The URL for the OKD4 nightly build images |
-    | `LOCAL_SECRET_JSON` | `${OKD4_SNC_PATH}/pull-secret.json` | The path to the pull secret needed for accessing the OKD4 images |
+    | `OKD_REGISTRY` | `quay.io/openshift/okd` | The URL for the OKD4 stable build images |
 
     After you you have completed any necessary modifications, add this script to ~/.bashrc so that it will execute on login.
 
@@ -140,6 +91,7 @@ Disconnect the keyboard, mouse, and display.  Your host is now headless.
     Now, set the environment in your local shell:
 
        . /root/bin/setSncEnv.sh
+
 
 ## DNS Configuration
 
@@ -208,31 +160,6 @@ Now that we are done with the configuration let's enable DNS and start it up.
     systemctl enable named
     systemctl start named
 
-Finally, we need to configure the `snc-host` to use the new DNS server
-
-1. Edit /etc/sysconfig/network-scripts/ifcfg-br0 and change the DNS entry to reflect the IP address of the `snc-host`
-
-       STP="yes"
-       BRIDGING_OPTS="priority=32768"
-       TYPE="Bridge"
-       PROXY_METHOD="none"
-       BROWSER_ONLY="no"
-       BOOTPROTO="none"
-       IPADDR="10.11.11.10"
-       PREFIX="24"
-       GATEWAY="10.11.11.1"
-       DNS1="10.11.11.10"          # This line should now be the IP address of this host.
-       DEFROUTE="yes"
-       IPV4_FAILURE_FATAL="no"
-       IPV6INIT="no"
-       NAME="br0"
-       DEVICE="br0"
-       ONBOOT="yes"
-
-1. Restart networking and make sure everything is working properly:
-
-       systemctl restart network.service
-
 1. You can now test DNS resolution.  Try some `ping` or `dig` commands.
 
        ping redhat.com
@@ -252,6 +179,56 @@ Name the file `your.domain.com` after the domain that you created for your SNC l
 Save the file.
 
 Your MacBook should now query your new DNS server for entries in your new domain.  __Note:__ If your MacBook is on a different network and is routed to your Lab network, then the `acl` entry in your DNS configuration must allow your external network to query.  Otherwise, you will bang your head wondering why it does not work...
+
+## Network Bridge
+
+Next, we need to set your host up for bridged networking so that your single node cluster will have an IP address that you can access on your local network.
+
+1. You need to identify the NIC that you configured when you installed this host.  It will be something like `eno1`, or `enp108s0u1`
+
+       ip addr
+
+    You will see out put like:
+
+       1: lo: <LOOPBACK,UP,LOWER_UP> mtu 65536 qdisc noqueue state UNKNOWN group default qlen 1000
+       link/loopback 00:00:00:00:00:00 brd 00:00:00:00:00:00
+       inet 127.0.0.1/8 scope host lo
+          valid_lft forever preferred_lft forever
+       inet6 ::1/128 scope host 
+          valid_lft forever preferred_lft forever
+
+       ....
+
+       15: eno1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+       link/ether 1c:69:7a:03:21:e9 brd ff:ff:ff:ff:ff:ff
+       inet 10.11.11.10/24 brd 10.11.11.255 scope global noprefixroute br0
+          valid_lft forever preferred_lft forever
+       inet6 fe80::1e69:7aff:fe03:21e9/64 scope link 
+          valid_lft forever preferred_lft forever
+
+    Somewhere in the output will be the interface that you configured with your snc-host IP address.  Find it and set a variable with that value:
+
+       PRIMARY_NIC="eno1"
+
+1. Create a network bridge device named `br0`
+
+       nmcli connection add type bridge ifname br0 con-name br0 ipv4.method manual ipv4.address "${SNC_HOST}/24" ipv4.gateway "${SNC_GATEWAY}" ipv4.dns "${SNC_NAMESERVER}" ipv4.dns-search "${SNC_DOMAIN}" ipv4.never-default no connection.autoconnect yes bridge.stp no ipv6.method ignore 
+
+1. Create a slave device for your primary NIC:
+
+       nmcli con add type ethernet con-name br0-slave-1 ifname ${PRIMARY_NIC} master br0
+
+1. Delete the configuration of the primary NIC:
+
+       nmcli con del ${PRIMARY_NIC}
+
+1. Recreate the configuration file for the primary NIC:
+
+       nmcli con add type ethernet con-name ${PRIMARY_NIC} ifname ${PRIMARY_NIC} connection.autoconnect no ipv4.method disabled ipv6.method ignore
+
+1. Restart networking and make sure everything is working properly:
+
+       systemctl restart network.service
 
 ## Nginx Configuration
 
@@ -301,37 +278,13 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     The `DeployOkdSnc.sh` script will pull the correct version of `oc` and `openshift-install` when we run it.  It will over-write older versions in `~/bin`.
 
-1. Now, we need a pull secret.  
-
-   The first one is for quay.io.  If you don't already have an account, go to `https://quay.io/` and create a free account.
-
-   Once you have your account, you need to extract your pull secret.
-
-   1. Log into your new Quay.io account.
-   1. In the top left corner, click the down arrow next to your user name.  This will expand a menu
-   1. Select `Account Settings`
-   1. Under `Docker CLI Password`, click on `Generate Encrypted Password`
-   1. Type in your quay.io password
-   1. Select `Kubernetes Secret`
-   1. Select `View <your-userid>-secret.yml`
-   1. Copy the base64 encoded string under `.dockerconfigjson`
-
-        It will look something like:
-
-           ewoblahblahblahblahblahblahblahREDACTEDetc...IH0KfQ==
-
-        But much longer...
-    1. We need to put the pull secret into a JSON file that we will use to set up the install-config.yaml file.
-
-           echo "PASTE THE COPIED BASE64 STRING HERE" | base64 -d > ${OKD4_SNC_PATH}/pull_secret.json 
-
 1. We need to configure the environment to pull a current version of OKD.  So point your browser at `https://origin-release.svc.ci.openshift.org`.  
 
     ![OKD Release](images/OKD-Release.png)
 
-    Select the most recent 4.4.0-0.okd release that is in a Phase of `Accepted`, and copy the release name into an environment variable:
+    Select the most recent 4.4.0-0.okd release from the `4-stable` stream that is in a Phase of `Accepted`, and copy the release name into an environment variable:
 
-       export OKD_RELEASE=4.4.0-0.okd-2020-03-23-073327
+       export OKD_RELEASE=4.4.0-0.okd-2020-05-23-055148-beta5
 
 1. The next step is to prepare the install-config.yaml file that `openshift-install` will use it to create the `ignition` files for bootstrap and master nodes.
 
@@ -356,7 +309,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
          replicas: 1
        platform:
          none: {}
-       pullSecret: '%%PULL_SECRET%%'
+       pullSecret: '{"auths":{"fake":{"auth": "bar"}}}'
        sshKey: %%SSH_KEY%%
 
     Copy this file to our working directory.
@@ -366,8 +319,6 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
     Patch in some values:
 
         sed -i "s|%%SNC_DOMAIN%%|${SNC_DOMAIN}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
-        SECRET=$(cat ${OKD4_SNC_PATH}/pull-secret.json)
-        sed -i "s|%%PULL_SECRET%%|${SECRET}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
         SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
         sed -i "s|%%SSH_KEY%%|${SSH_KEY}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
 
@@ -392,7 +343,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
          replicas: 1
        platform:
          none: {}
-       pullSecret: '{"auths": {"quay.io": {"auth": "Y2dydREDACTEDREDACTEDHeGtREDACTEDREDACTEDU55NWV5MREDACTEDREDACTEDM4bmZB", "email": ""},"nexus.oscluster.clgcom.org:5002": {"auth": "YREDACTEDREDACTED==", "email": ""}}}'
+       pullSecret: '{"auths":{"fake":{"auth": "bar"}}}'
        sshKey: ssh-rsa AAAREDACTEDREDACTEDAQAREDACTEDREDACTEDMnvPFqpEoOvZi+YK3L6MIGzVXbgo8SZREDACTEDREDACTEDbNZhieREDACTEDREDACTEDYI/upDR8TUREDACTEDREDACTEDoG1oJ+cRf6Z6gd+LZNE+jscnK/xnAyHfCBdhoyREDACTEDREDACTED9HmLRkbBkv5/2FPpc+bZ2xl9+I1BDr2uREDACTEDREDACTEDG7Ms0vJqrUhwb+o911tOJB3OWkREDACTEDREDACTEDU+1lNcFE44RREDACTEDREDACTEDov8tWSzn root@snc-host
 
 1. Set a couple of environment variables that the `DeployOkdSnc` script will use for Fedora CoreOS installation. 
@@ -405,7 +356,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     Set the FCOS version as a variable.  For example:
 
-       FCOS_VER=31.20200223.3.0
+       FCOS_VER=31.20200505.3.0
 
     Set the FCOS_STREAM variable to `stable` or `testing` to match the stream that you are pulling from.
 
