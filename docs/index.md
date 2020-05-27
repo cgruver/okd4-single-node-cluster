@@ -196,21 +196,20 @@ Next, we need to set your host up for bridged networking so that your single nod
           valid_lft forever preferred_lft forever
        inet6 ::1/128 scope host 
           valid_lft forever preferred_lft forever
-
-       ....
-
-       15: eno1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UP group default qlen 1000
+       2: eno1: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc pfifo_fast state UP group default qlen 1000
        link/ether 1c:69:7a:03:21:e9 brd ff:ff:ff:ff:ff:ff
-       inet 10.11.11.10/24 brd 10.11.11.255 scope global noprefixroute br0
+       inet 10.11.11.10/24 brd 10.11.11.255 scope global noprefixroute eno1
           valid_lft forever preferred_lft forever
        inet6 fe80::1e69:7aff:fe03:21e9/64 scope link 
           valid_lft forever preferred_lft forever
+       3: wlp0s20f3: <NO-CARRIER,BROADCAST,MULTICAST,UP> mtu 1500 qdisc mq state DOWN group default qlen 1000
+       link/ether ca:33:7a:77:8e:e4 brd ff:ff:ff:ff:ff:ff
 
     Somewhere in the output will be the interface that you configured with your snc-host IP address.  Find it and set a variable with that value:
 
        PRIMARY_NIC="eno1"
 
-1. Create a network bridge device named `br0`
+1. Create a network bridge device named `br0` (If your NETMASK is not `255.255.255.0`, then replace `24` with the appropriate mask below)
 
        nmcli connection add type bridge ifname br0 con-name br0 ipv4.method manual ipv4.address "${SNC_HOST}/24" ipv4.gateway "${SNC_GATEWAY}" ipv4.dns "${SNC_NAMESERVER}" ipv4.dns-search "${SNC_DOMAIN}" ipv4.never-default no connection.autoconnect yes bridge.stp no ipv6.method ignore 
 
