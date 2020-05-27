@@ -3,11 +3,11 @@
 set -x
 
 # This script will set up the infrastructure to deploy a single node OKD 4.X cluster
-PULL_RELEASE=false
-USE_MIRROR=false
 CPU="4"
 MEMORY="16384"
 DISK="200"
+FCOS_VER=31.20200505.2.0
+FCOS_STREAM=testing
 
 for i in "$@"
 do

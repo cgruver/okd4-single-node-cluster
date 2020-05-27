@@ -24,7 +24,7 @@ After the installation completes, ensure that you can ssh to your host.
 
 Install packages and set up KVM:
 
-    yum -y install wget git net-tools bind bind-utils bash-completion nfs-utils rsync qemu-kvm libvirt libvirt-python libguestfs-tools virt-install iscsi-initiator-utils
+    yum -y install wget git net-tools bind bind-utils bash-completion nfs-utils rsync qemu-kvm libvirt libvirt-python libguestfs-tools virt-install iscsi-initiator-utils httpd-tools
 
     systemctl enable libvirtd
     systemctl start libvirtd
@@ -160,10 +160,6 @@ Now that we are done with the configuration let's enable DNS and start it up.
     systemctl enable named
     systemctl start named
 
-1. You can now test DNS resolution.  Try some `ping` or `dig` commands.
-
-       ping redhat.com
-
 ### __Hugely Helpful Tip:__
 
 __If you are using a MacBook for your workstation, you can enable DNS resolution to your lab by creating a file in the `/etc/resolver` directory on your Mac.__
@@ -229,6 +225,10 @@ Next, we need to set your host up for bridged networking so that your single nod
 
        systemctl restart network.service
 
+1. You can now test DNS resolution.  Try some `ping` or `dig` commands.
+
+       ping redhat.com
+
 ## Nginx Configuration
 
 We are going to install the Nginx HTTP server and configure it to serve up the Fedora CoreOS installation images and the ignition config files.
@@ -274,6 +274,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
        mv kubectl ~/bin
        rm -f openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
        rm -f README.md
+       cd -
 
     The `DeployOkdSnc.sh` script will pull the correct version of `oc` and `openshift-install` when we run it.  It will over-write older versions in `~/bin`.
 
@@ -345,24 +346,9 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
        pullSecret: '{"auths":{"fake":{"auth": "bar"}}}'
        sshKey: ssh-rsa AAAREDACTEDREDACTEDAQAREDACTEDREDACTEDMnvPFqpEoOvZi+YK3L6MIGzVXbgo8SZREDACTEDREDACTEDbNZhieREDACTEDREDACTEDYI/upDR8TUREDACTEDREDACTEDoG1oJ+cRf6Z6gd+LZNE+jscnK/xnAyHfCBdhoyREDACTEDREDACTED9HmLRkbBkv5/2FPpc+bZ2xl9+I1BDr2uREDACTEDREDACTEDG7Ms0vJqrUhwb+o911tOJB3OWkREDACTEDREDACTEDU+1lNcFE44RREDACTEDREDACTEDov8tWSzn root@snc-host
 
-1. Set a couple of environment variables that the `DeployOkdSnc` script will use for Fedora CoreOS installation. 
-
-    In a browser, go to: `https://getfedora.org/en/coreos/download/`
-
-    Make sure you are on the `stable` Stream, select the `Bare Metal & Virtualized` tab, and make note of the current version. 
-
-    ![FCOS Download Page](images/FCOS-Download.png)
-
-    Set the FCOS version as a variable.  For example:
-
-       FCOS_VER=31.20200505.3.0
-
-    Set the FCOS_STREAM variable to `stable` or `testing` to match the stream that you are pulling from.
-
-       FCOS_STREAM=stable
-
 1. Create the cluster virtual machines and start the OKD installation:
 
+       cd ${OKD4_SNC_PATH}
        DeployOkdSnc.sh
 
     This script does a whole lot of work for you:
@@ -409,34 +395,9 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
        DEBUG Built from commit 4cb9ca89c59cbc7e5b4caf3863e098057b496a15 
        INFO Waiting up to 20m0s for the Kubernetes API at https://api.okd4-snc.snc.test:6443... 
 
-    __We are waiting for the API to be available so that we can inject a setting to allow for a single node cluster to run:__
+    __This will take a while, be patient.__
 
-
-1. When you see the following message... 
-
-       INFO API v1.17.1 up                               
-       INFO Waiting up to 40m0s for bootstrapping to complete... 
-
-    execute the following commands:
-
-       export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
-       oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableEtcd": true}}}' --type=merge
-
-    If the command fails, try it again until it succeeds.  The `etcd` operator config may not be available for patching right away.
-
-    You might see errors like:
-
-       error: the server doesn't have a resource type "etcd"
-    
-    Or:
-
-       Error from server (NotFound): etcds.operator.openshift.io "cluster" not found
-
-    Keep trying, it should succeed in a minute or two at most.
-
-1. Now, wait for the bootstrap to complete:
-
-       openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for bootstrap-complete --log-level debug
+    __If you want to watch something happening, see "Watching Bootstrap and Install processes in more detail" below.__
 
 1. When the Bootstrap process is complete, destroy the Bootstrap node.
 
@@ -511,7 +472,7 @@ __If you forget the password for this initial account, you can find it in the fi
     htpasswd -B -c -b ${OKD4_SNC_PATH}/okd-creds/htpasswd admin $(cat ${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password)
     htpasswd -b ${OKD4_SNC_PATH}/okd-creds/htpasswd devuser devpwd
     oc create -n openshift-config secret generic htpasswd-secret --from-file=htpasswd=${OKD4_SNC_PATH}/okd-creds/htpasswd
-    oc apply -f ${OKD4_LAB_PATH}/htpasswd-cr.yml
+    oc apply -f ${OKD4_SNC_PATH}/okd4-single-node-cluster/htpasswd-cr.yaml
     oc adm policy add-cluster-role-to-user cluster-admin admin
 
     oc delete secrets kubeadmin -n kube-system
@@ -520,4 +481,6 @@ __If you forget the password for this initial account, you can find it in the fi
 
     oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
 
+### Configure the Image Pruner:
 
+    oc patch imagepruners.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"schedule":"*/0 * * * *","suspend":false,"keepTagRevisions":3,"keepYoungerThan":60,"resources":{},"affinity":{},"nodeSelector":{},"tolerations":[],"startingDeadlineSeconds":60,"successfulJobsHistoryLimit":3,"failedJobsHistoryLimit":3}}'
