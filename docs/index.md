@@ -24,7 +24,7 @@ After the installation completes, ensure that you can ssh to your host.
 
 Install packages and set up KVM:
 
-    yum -y install wget git net-tools bind bind-utils bash-completion nfs-utils rsync qemu-kvm libvirt libvirt-python libguestfs-tools virt-install iscsi-initiator-utils httpd-tools
+    yum -y install wget git net-tools bind bind-utils bash-completion nfs-utils rsync qemu-kvm libvirt libvirt-python libguestfs-tools virt-install iscsi-initiator-utils httpd-tools epel-release
 
     systemctl enable libvirtd
     systemctl start libvirtd
