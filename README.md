@@ -10,3 +10,10 @@ I am using a [NUC8i3BEK](https://ark.intel.com/content/www/us/en/ark/products/12
 Follow the guide here: [OKD 4.4 Single Node Cluster](https://cgruver.github.io/okd4-single-node-cluster/)
 
 Much of the material for this minimal cluster is borrowed from my other OKD 4.4 tutorial.  If you are interested in building a full OKD 4.4 cluster, then check it out here: [OKD 4.4 Lab](https://cgruver.github.io/okd4-upi-lab-setup/).
+
+__If you want to connect with a team of OpenShift enthusiasts, join us in the OKD Working Group:__
+
+https://github.com/openshift/okd
+
+https://github.com/openshift/community
+
