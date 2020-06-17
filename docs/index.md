@@ -468,14 +468,31 @@ __If you forget the password for this initial account, you can find it in the fi
 
 ## Set up htpasswd Authentication:
 
-    mkdir -p ${OKD4_SNC_PATH}/okd-creds
-    htpasswd -B -c -b ${OKD4_SNC_PATH}/okd-creds/htpasswd admin $(cat ${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password)
-    htpasswd -b ${OKD4_SNC_PATH}/okd-creds/htpasswd devuser devpwd
-    oc create -n openshift-config secret generic htpasswd-secret --from-file=htpasswd=${OKD4_SNC_PATH}/okd-creds/htpasswd
-    oc apply -f ${OKD4_SNC_PATH}/okd4-single-node-cluster/htpasswd-cr.yaml
-    oc adm policy add-cluster-role-to-user cluster-admin admin
+1. Create an htpasswd file with two users.  The `user` admin will be assigned the password that was created when you installed your cluster.  The user `devuser` will be assigned the password `devpwd`.  THe user `devuser` will have default permissions.
 
-    oc delete secrets kubeadmin -n kube-system
+       mkdir -p ${OKD4_SNC_PATH}/okd-creds
+       htpasswd -B -c -b ${OKD4_SNC_PATH}/okd-creds/htpasswd admin $(cat ${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password)
+       htpasswd -b ${OKD4_SNC_PATH}/okd-creds/htpasswd devuser devpwd
+
+1. Now, create a Secret with this htpasswd file:
+
+       oc create -n openshift-config secret generic htpasswd-secret --from-file=htpasswd=${OKD4_SNC_PATH}/okd-creds/htpasswd
+
+1. Create the Htpasswd Identity Provider:
+
+    I have provided an Identity Provider custom resource configuration located at `./htpasswd-cr.yaml` in this project.
+
+       oc apply -f ${OKD4_SNC_PATH}/okd4-single-node-cluster/htpasswd-cr.yaml
+
+1. Make the user `admin` a Cluster Administrator:
+
+       oc adm policy add-cluster-role-to-user cluster-admin admin
+
+1. Now, log into the web console as your new admin user to verify access.  Select the `Htpasswd` provider when you log in.
+
+1. Finally, remove temporary user:
+
+       oc delete secrets kubeadmin -n kube-system
 
 ### Create an Empty volume for registry storage:
 
