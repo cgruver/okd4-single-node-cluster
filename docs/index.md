@@ -274,7 +274,6 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
        mv kubectl ~/bin
        rm -f openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
        rm -f README.md
-       cd -
 
     The `DeployOkdSnc.sh` script will pull the correct version of `oc` and `openshift-install` when we run it.  It will over-write older versions in `~/bin`.
 
@@ -314,7 +313,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     Copy this file to our working directory.
 
-        cp ./install-config-snc.yaml ${OKD4_SNC_PATH}/install-config-snc.yaml
+        cp ${OKD4_SNC_PATH}/okd4-single-node-cluster/install-config-snc.yaml ${OKD4_SNC_PATH}/install-config-snc.yaml
 
     Patch in some values:
 
