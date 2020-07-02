@@ -283,7 +283,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     Select the most recent 4.4.0-0.okd release from the `4-stable` stream that is in a Phase of `Accepted`, and copy the release name into an environment variable:
 
-       export OKD_RELEASE=4.4.0-0.okd-2020-05-23-055148-beta5
+       export OKD_RELEASE=4.5.0-0.okd-2020-06-29-110348-beta6
 
 1. The next step is to prepare the install-config.yaml file that `openshift-install` will use it to create the `ignition` files for bootstrap and master nodes.
 
@@ -499,4 +499,4 @@ __If you forget the password for this initial account, you can find it in the fi
 
 ### Configure the Image Pruner:
 
-    oc patch imagepruners.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"schedule":"*/0 * * * *","suspend":false,"keepTagRevisions":3,"keepYoungerThan":60,"resources":{},"affinity":{},"nodeSelector":{},"tolerations":[],"startingDeadlineSeconds":60,"successfulJobsHistoryLimit":3,"failedJobsHistoryLimit":3}}'
+    oc patch imagepruners.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"schedule":"0 0 * * *","suspend":false,"keepTagRevisions":3,"keepYoungerThan":60,"resources":{},"affinity":{},"nodeSelector":{},"tolerations":[],"startingDeadlineSeconds":60,"successfulJobsHistoryLimit":3,"failedJobsHistoryLimit":3}}'

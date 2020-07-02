@@ -63,7 +63,7 @@ tar -xf ${OKD4_SNC_PATH}/syslinux-6.03.tar.xz -C ${OKD4_SNC_PATH}/
 # Prepare FCOS boot ISO
 mkdir -p ${OKD4_SNC_PATH}/fcos-iso/{isolinux,images}
 curl -o ${OKD4_SNC_PATH}/fcos-iso/images/vmlinuz https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-kernel-x86_64
-curl -o /tmp/fcos-iso/images/initramfs.img https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-initramfs.x86_64.img
+curl -o ${OKD4_SNC_PATH}/fcos-iso/images/initramfs.img https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-initramfs.x86_64.img
 cp ${OKD4_SNC_PATH}/syslinux-6.03/bios/com32/elflink/ldlinux/ldlinux.c32 ${OKD4_SNC_PATH}/fcos-iso/isolinux/ldlinux.c32
 cp ${OKD4_SNC_PATH}/syslinux-6.03/bios/core/isolinux.bin ${OKD4_SNC_PATH}/fcos-iso/isolinux/isolinux.bin
 cp ${OKD4_SNC_PATH}/syslinux-6.03/bios/com32/menu/vesamenu.c32 ${OKD4_SNC_PATH}/fcos-iso/isolinux/vesamenu.c32
