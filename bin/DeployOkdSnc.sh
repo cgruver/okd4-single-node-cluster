@@ -90,11 +90,11 @@ menu separator
 menu end
 EOF
 
-mkisofs -o ${OKD4_SNC_PATH}/bootstrap.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -r ${OKD4_SNC_PATH}/fcos-iso/
+mkisofs -o /tmp/bootstrap.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -J -r ${OKD4_SNC_PATH}/fcos-iso/
 
 # Create the Bootstrap Node VM
 mkdir -p /VirtualMachines/okd4-snc-bootstrap
-virt-install --name okd4-snc-bootstrap --memory 14336 --vcpus 2 --disk size=100,path=/VirtualMachines/okd4-snc-bootstrap/rootvol,bus=sata --cdrom ${OKD4_SNC_PATH}/bootstrap.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
+virt-install --name okd4-snc-bootstrap --memory 14336 --vcpus 2 --disk size=100,path=/VirtualMachines/okd4-snc-bootstrap/rootvol,bus=sata --cdrom /tmp/bootstrap.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
 
 IP=""
 
@@ -121,6 +121,6 @@ mkisofs -o /tmp/snc-master.iso -b isolinux/isolinux.bin -c isolinux/boot.cat -no
 
 # Create the OKD Node VM
 mkdir -p /VirtualMachines/okd4-snc-master
-virt-install --name okd4-snc-master --memory ${MEMORY} --vcpus ${CPU} --disk size=${DISK},path=/VirtualMachines/okd4-snc-master/rootvol,bus=sata --cdrom ${OKD4_SNC_PATH}/snc-master.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
+virt-install --name okd4-snc-master --memory ${MEMORY} --vcpus ${CPU} --disk size=${DISK},path=/VirtualMachines/okd4-snc-master/rootvol,bus=sata --cdrom /tmp/snc-master.iso --network bridge=br0 --graphics none --noautoconsole --os-variant centos7.0
 
 rm -rf ${OKD4_SNC_PATH}/fcos-iso
