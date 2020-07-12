@@ -51,11 +51,6 @@ openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir create ignition-config
 cp -r ${OKD4_SNC_PATH}/okd4-install-dir/*.ign ${INSTALL_ROOT}/fcos/ignition/
 chmod 644 ${INSTALL_ROOT}/fcos/ignition/*
 
-# Download FCOS images
-
-curl -o ${INSTALL_ROOT}/fcos/install.xz https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-metal.x86_64.raw.xz
-curl -o ${INSTALL_ROOT}/fcos/install.xz.sig https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-metal.x86_64.raw.xz.sig
-
 # Download Syslinux
 curl -o ${OKD4_SNC_PATH}/syslinux-6.03.tar.xz https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/syslinux-6.03.tar.xz
 tar -xf ${OKD4_SNC_PATH}/syslinux-6.03.tar.xz -C ${OKD4_SNC_PATH}/
@@ -112,7 +107,7 @@ label linux
   menu label ^Fedora CoreOS (Live)
   menu default
   kernel /images/vmlinuz
-  append initrd=/images/initramfs.img ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-master.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.image_url=${INSTALL_URL}/fcos/install.xz coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/master.ign coreos.inst.platform_id=qemu console=ttyS0
+  append initrd=/images/initramfs.img ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-master.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/master.ign coreos.inst.platform_id=qemu console=ttyS0
 menu separator
 menu end
 EOF
