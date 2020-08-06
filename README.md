@@ -3,7 +3,7 @@ Building an OKD4 SIngle Node Cluster with minimal resources
 
 __Updated for OKD 4 Beta 6 with Fedora CoreOS 32__
 
-__Needs a patch to work with OKD 4.5 GA - Changes to how FCOS handles NIC configuration need to be accounted for.  I will be pushing a fix soon.__
+__Needs a patch to work with OKD 4.5 GA - Changes to how FCOS handles NIC configuration need to be accounted for.  I will be pushing a fix with an overall upgrade to CentOS 8.__
 
 This tutorial will guide you through deploying an OKD 4.4 cluster that is as minimal as possible.  It will consist of one node which is both master and worker.
 
