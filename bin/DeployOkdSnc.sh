@@ -6,7 +6,7 @@ set -x
 CPU="4"
 MEMORY="16384"
 DISK="200"
-FCOS_VER=32.20200601.3.0
+FCOS_VER=32.20200809.3.0
 FCOS_STREAM=stable
 
 for i in "$@"
@@ -158,7 +158,7 @@ label linux
   menu label ^Fedora CoreOS (Live)
   menu default
   kernel /images/vmlinuz
-  append initrd=/images/initramfs.img ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-bootstrap.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/bootstrap.ign coreos.inst.platform_id=qemu console=ttyS0
+  append initrd=/images/initramfs.img net.ifnames=1 ifname=nic0:${BOOT_MAC} ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-bootstrap.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/bootstrap.ign coreos.inst.platform_id=qemu console=ttyS0
 menu separator
 menu end
 EOF
@@ -185,7 +185,7 @@ label linux
   menu label ^Fedora CoreOS (Live)
   menu default
   kernel /images/vmlinuz
-  append initrd=/images/initramfs.img ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-master.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/master.ign coreos.inst.platform_id=qemu console=ttyS0
+  append initrd=/images/initramfs.img net.ifnames=1 ifname=nic0:${MASTER_MAC} ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-master.${SNC_DOMAIN}:eth0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/master.ign coreos.inst.platform_id=qemu console=ttyS0
 menu separator
 menu end
 EOF

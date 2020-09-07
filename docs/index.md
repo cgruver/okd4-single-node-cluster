@@ -36,12 +36,9 @@ Install packages and set up KVM:
     virsh pool-autostart default
     virsh pool-start default
 
-Create an SSH key pair: (Take the defaults for all of the prompts, don't set a key password)
+Create an SSH key pair: (Take the defaults for all of the prompts, don't set a key passphrase)
 
-    ssh-keygen
-    <Enter>
-    <Enter>
-    <Enter>
+    ssh-keygen -N "" -f id_rsa
 
 Update and shutdown the SNC host:
 
@@ -157,8 +154,7 @@ Now that we are done with the configuration let's enable DNS and start it up.
 
     firewall-cmd --permanent --add-service=dns
     firewall-cmd --reload
-    systemctl enable named
-    systemctl start named
+    systemctl enable named --now
 
 ### __Hugely Helpful Tip:__
 
@@ -223,7 +219,7 @@ Next, we need to set your host up for bridged networking so that your single nod
 
 1. Restart networking and make sure everything is working properly:
 
-       systemctl restart network.service
+       systemctl restart NetworkManager.service
 
 1. You can now test DNS resolution.  Try some `ping` or `dig` commands.
 
@@ -241,9 +237,8 @@ Open firewall ports for HTTP/S so that we can access the Nginx server:
 
 Install and start Nginx:
 
-    yum -y install nginx
-    systemctl enable nginx
-    systemctl start nginx
+    dnf -y install nginx
+    systemctl enable nginx --now
 
 Create the directory structure for the Fedora CoreOS install files.
 
@@ -262,17 +257,17 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
 1. Retrieve the `oc` command.  We're going to grab an older version of `oc`, but that's OK.  We just need it to retrieve to current versions of `oc` and `openshift-install`
 
-    Go to: `https://github.com/openshift/okd/releases/tag/4.4.0-0.okd-2020-01-28-022517` and retrieve the `openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz` archive.
+    Go to: `https://github.com/openshift/okd/releases/tag/4.5.0-0.okd-2020-09-04-180756` and retrieve the `openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz` archive.
 
        cd ${OKD4_SNC_PATH}
-       wget https://github.com/openshift/okd/releases/download/4.4.0-0.okd-2020-01-28-022517/openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
+       wget https://github.com/openshift/okd/releases/download/4.5.0-0.okd-2020-09-04-180756/openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz
 
 1. Uncompress the archive and move the `oc` executable to your ~/bin directory.
 
-       tar -xzf openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
+       tar -xzf openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz
        mv oc ~/bin
        mv kubectl ~/bin
-       rm -f openshift-client-linux-4.4.0-0.okd-2020-01-28-022517.tar.gz
+       rm -f openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz
        rm -f README.md
 
     The `DeployOkdSnc.sh` script will pull the correct version of `oc` and `openshift-install` when we run it.  It will over-write older versions in `~/bin`.
