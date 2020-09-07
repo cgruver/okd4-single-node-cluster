@@ -2,9 +2,9 @@
 
 ## Host setup:
 
-You need to start with a minimal CentOS 7 install.
+You need to start with a minimal CentOS 8 install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
 
-    wget https://buildlogs.centos.org/rolling/7/isos/x86_64/CentOS-7-x86_64-Minimal.iso
+Download the minimal install ISO from: http://isoredirect.centos.org/centos/8/isos/x86_64/
 
 Use a tool like [balenaEtcher](https://www.balena.io/etcher/) to create a bootable USB key from a CentOS ISO.
 
@@ -24,10 +24,10 @@ After the installation completes, ensure that you can ssh to your host.
 
 Install packages and set up KVM:
 
-    yum -y install wget git net-tools bind bind-utils bash-completion nfs-utils rsync qemu-kvm libvirt libvirt-python libguestfs-tools virt-install iscsi-initiator-utils httpd-tools epel-release
+    dnf -y module install virt
+    dnf -y install wget git net-tools bind bind-utils bash-completion rsync libguestfs-tools virt-install epel-release libvirt-devel httpd-tools
 
-    systemctl enable libvirtd
-    systemctl start libvirtd
+    systemctl enable libvirtd --now
 
     mkdir /VirtualMachines
     virsh pool-destroy default
@@ -45,7 +45,7 @@ Create an SSH key pair: (Take the defaults for all of the prompts, don't set a k
 
 Update and shutdown the SNC host:
 
-    yum -y update
+    dnf -y update
     shutdown -h now
 
 Disconnect the keyboard, mouse, and display.  Your host is now headless.  
@@ -355,6 +355,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
     1. It will pull the current versions of `oc` and `openshift-install` based on the value of `${OKD_RELEASE}` that we set previously.
     1. Copies the install-config-snc.yaml file to the install directory as install-config.yaml.
     1. Invokes the openshift-install command against our install-config to produce ignition files
+    1. Modifies the ignition files for the SNC node IP configruation
     1. Copies the ignition files into place for FCOS install
     1. Pulls the requested Fedora CoreOS release based on the values of `${FCOS_VER}` and `${FCOS_STREAM}`
     1. Creates a bootable ISO for the Bootstrap and Master nodes with a customized `isolinux.cfg` file.
