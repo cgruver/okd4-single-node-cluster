@@ -17,6 +17,6 @@ controlPlane:
   replicas: 1
 platform:
   none: {}
-pullSecret: '{"auths":{"fake":{"auth": "bar"}}}'
+pullSecret: '{"auths":{"fake":{"auth": "Zm9vOmJhcgo="}}}'
 sshKey: %%SSH_KEY%%
 

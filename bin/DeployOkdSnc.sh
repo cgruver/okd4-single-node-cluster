@@ -30,6 +30,69 @@ case $i in
 esac
 done
 
+function configOkdNode() {
+    
+  local ip_addr=${1}
+  local host_name=${2}
+  local mac=${3}
+  local role=${4}
+
+cat << EOF > ${OKD4_SNC_PATH}/work-dir/ignition/${role}.yml
+variant: fcos
+version: 1.1.0
+ignition:
+  config:
+    merge:
+      - local: ${role}.ign
+storage:
+  files:
+    - path: /etc/zincati/config.d/90-disable-feature.toml
+      mode: 0644
+      contents:
+        inline: |
+          [updates]
+          enabled = false
+    - path: /etc/systemd/network/25-nic0.link
+      mode: 0644
+      contents:
+        inline: |
+          [Match]
+          MACAddress=${mac}
+          [Link]
+          Name=nic0
+    - path: /etc/NetworkManager/system-connections/nic0.nmconnection
+      mode: 0600
+      overwrite: true
+      contents:
+        inline: |
+          [connection]
+          type=ethernet
+          interface-name=nic0
+          [ethernet]
+          mac-address=${mac}
+          [ipv4]
+          method=manual
+          addresses=${ip_addr}/${SNC_NETMASK}
+          gateway=${SNC_GATEWAY}
+          dns=${SNC_NAMESERVER}
+          dns-search=${SNC_DOMAIN}
+    - path: /etc/hostname
+      mode: 0420
+      overwrite: true
+      contents:
+        inline: |
+          ${host_name}
+EOF
+}
+
+# Generate MAC addresses for the master and bootstrap nodes:
+BOOT_MAC=$(date +%s | md5sum | head -c 6 | sed -e 's/\([0-9A-Fa-f]\{2\}\)/\1:/g' -e 's/\(.*\):$/\1/' | sed -e 's/^/52:54:00:/')
+sleep 1
+MASTER_MAC=$(date +%s | md5sum | head -c 6 | sed -e 's/\([0-9A-Fa-f]\{2\}\)/\1:/g' -e 's/\(.*\):$/\1/' | sed -e 's/^/52:54:00:/')
+
+# Get the IP addresses for the master and bootstrap nodes:
+BOOT_IP=$(dig okd4-snc-bootstrap.${SNC_DOMAIN} +short)
+MASTER_IP=$(dig okd4-snc-master.${SNC_DOMAIN} +short)
 
 # Pull the OKD release tooling identified by ${OKD_REGISTRY}:${OKD_RELEASE}.  i.e. OKD_REGISTRY=registry.svc.ci.openshift.org/origin/release, OKD_RELEASE=4.4.0-0.okd-2020-03-03-170958
 mkdir -p ${OKD4_SNC_PATH}/okd-release-tmp
@@ -41,6 +104,13 @@ mv -f oc ~/bin
 cd ..
 rm -rf okd-release-tmp
 
+# Download fcct
+rm -rf ${OKD4_SNC_PATH}/work-dir
+mkdir -p ${OKD4_SNC_PATH}/work-dir/ignition
+wget https://github.com/coreos/fcct/releases/download/v0.6.0/fcct-x86_64-unknown-linux-gnu
+mv fcct-x86_64-unknown-linux-gnu ${OKD4_SNC_PATH}/work-dir/fcct 
+chmod 750 ${OKD4_SNC_PATH}/work-dir/fcct
+
 # Create and deploy ignition files
 rm -rf ${OKD4_SNC_PATH}/okd4-install-dir
 mkdir -p ${OKD4_SNC_PATH}/okd4-install-dir
@@ -48,8 +118,16 @@ cp ${OKD4_SNC_PATH}/install-config-snc.yaml ${OKD4_SNC_PATH}/okd4-install-dir/in
 OKD_VER=$(echo $OKD_RELEASE | sed  "s|4.4.0-0.okd|4.4|g")
 sed -i "s|%%OKD_VER%%|${OKD_VER}|g" ${OKD4_SNC_PATH}/okd4-install-dir/install-config.yaml
 openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir create ignition-configs
-cp -r ${OKD4_SNC_PATH}/okd4-install-dir/*.ign ${INSTALL_ROOT}/fcos/ignition/
+
+# Modify ignition files for IP config:
+configOkdNode ${BOOT_IP} okd4-snc-bootstrap.${SNC_DOMAIN} ${BOOT_MAC} bootstrap
+configOkdNode ${MASTER_IP} okd4-snc-master.${SNC_DOMAIN} ${MASTER_MAC} master
+cat ${OKD4_SNC_PATH}/work-dir/ignition/bootstrap.yml | ${OKD4_SNC_PATH}/work-dir/fcct -d ${OKD4_SNC_PATH}/okd4-install-dir/ -o ${OKD4_SNC_PATH}/work-dir/ignition/bootstrap.ign
+cat ${OKD4_SNC_PATH}/work-dir/ignition/master.yml | ${OKD4_SNC_PATH}/work-dir/fcct -d ${OKD4_SNC_PATH}/okd4-install-dir/ -o ${OKD4_SNC_PATH}/work-dir/ignition/master.ign
+
+cp -r ${OKD4_SNC_PATH}/work-dir/ignition/*.ign ${INSTALL_ROOT}/fcos/ignition/
 chmod 644 ${INSTALL_ROOT}/fcos/ignition/*
+
 
 # Download Syslinux
 curl -o ${OKD4_SNC_PATH}/syslinux-6.03.tar.xz https://mirrors.edge.kernel.org/pub/linux/utils/boot/syslinux/syslinux-6.03.tar.xz
