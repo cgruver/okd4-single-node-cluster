@@ -1,7 +1,9 @@
 # okd4-single-node-cluster
 Building an OKD4 SIngle Node Cluster with minimal resources
 
-__Note: This needs to be fixed to work with OKD 4.6 and FCOS 33__  In the meantime, my full cluster tutorial will work if you just specify a single node in your install YAML:  https://github.com/cgruver/okd4-upi-lab-setup
+__Note: This needs to be fixed to work with OKD 4.6 and FCOS 33.__   
+
+In the meantime, my full cluster tutorial will work if you just specify a single node in your install YAML:  https://github.com/cgruver/okd4-upi-lab-setup
 
 __Update coming soon...__
 
