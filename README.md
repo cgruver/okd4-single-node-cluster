@@ -1,7 +1,9 @@
 # okd4-single-node-cluster
 Building an OKD4 SIngle Node Cluster with minimal resources
 
-__Updated for OKD 4 GA with Fedora CoreOS 32__
+__Note: This needs to be fixed to work with OKD 4.6 and FCOS 33__  In the meantime, my full cluster tutorial will work if you just specify a single node in your install YAML:  https://github.com/cgruver/okd4-upi-lab-setup
+
+__Update coming soon...__
 
 This tutorial will guide you through deploying an OKD 4.4 cluster that is as minimal as possible.  It will consist of one node which is both master and worker.
 
