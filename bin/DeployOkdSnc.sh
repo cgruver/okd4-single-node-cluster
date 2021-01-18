@@ -6,7 +6,7 @@ set -x
 CPU="4"
 MEMORY="16384"
 DISK="200"
-FCOS_VER=32.20200809.3.0
+FCOS_VER=33.20201201.3.0
 FCOS_STREAM=stable
 
 for i in "$@"
@@ -137,6 +137,9 @@ tar -xf ${OKD4_SNC_PATH}/syslinux-6.03.tar.xz -C ${OKD4_SNC_PATH}/
 mkdir -p ${OKD4_SNC_PATH}/fcos-iso/{isolinux,images}
 curl -o ${OKD4_SNC_PATH}/fcos-iso/images/vmlinuz https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-kernel-x86_64
 curl -o ${OKD4_SNC_PATH}/fcos-iso/images/initramfs.img https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-initramfs.x86_64.img
+curl -o ${OKD4_SNC_PATH}/fcos-iso/images/rootfs.img https://builds.coreos.fedoraproject.org/prod/streams/${FCOS_STREAM}/builds/${FCOS_VER}/x86_64/fedora-coreos-${FCOS_VER}-live-rootfs.x86_64.img
+
+
 cp ${OKD4_SNC_PATH}/syslinux-6.03/bios/com32/elflink/ldlinux/ldlinux.c32 ${OKD4_SNC_PATH}/fcos-iso/isolinux/ldlinux.c32
 cp ${OKD4_SNC_PATH}/syslinux-6.03/bios/core/isolinux.bin ${OKD4_SNC_PATH}/fcos-iso/isolinux/isolinux.bin
 cp ${OKD4_SNC_PATH}/syslinux-6.03/bios/com32/menu/vesamenu.c32 ${OKD4_SNC_PATH}/fcos-iso/isolinux/vesamenu.c32
@@ -158,7 +161,7 @@ label linux
   menu label ^Fedora CoreOS (Live)
   menu default
   kernel /images/vmlinuz
-  append initrd=/images/initramfs.img net.ifnames=1 ifname=nic0:${BOOT_MAC} ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-bootstrap.${SNC_DOMAIN}:nic0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/bootstrap.ign coreos.inst.platform_id=qemu console=ttyS0
+  append initrd=/images/initramfs.img initrd=/images/rootfs.img net.ifnames=1 ifname=nic0:${BOOT_MAC} ip=${IP}::${SNC_GATEWAY}:${SNC_NETMASK}:okd4-snc-bootstrap.${SNC_DOMAIN}:nic0:none nameserver=${SNC_NAMESERVER} rd.neednet=1 coreos.inst=yes coreos.inst.install_dev=/dev/sda coreos.inst.ignition_url=${INSTALL_URL}/fcos/ignition/bootstrap.ign coreos.inst.platform_id=qemu console=ttyS0
 menu separator
 menu end
 EOF
