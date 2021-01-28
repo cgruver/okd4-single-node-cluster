@@ -2,9 +2,9 @@
 
 ## Host setup:
 
-You need to start with a minimal CentOS 8 install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
+You need to start with a minimal CentOS Stream install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
 
-Download the minimal install ISO from: http://isoredirect.centos.org/centos/8/isos/x86_64/
+Download the minimal install ISO from: http://isoredirect.centos.org/centos/8-stream/isos/x86_64/
 
 Use a tool like [balenaEtcher](https://www.balena.io/etcher/) to create a bootable USB key from a CentOS ISO.
 
