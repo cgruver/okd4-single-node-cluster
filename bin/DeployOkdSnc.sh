@@ -115,7 +115,7 @@ chmod 750 ${OKD4_SNC_PATH}/work-dir/fcct
 rm -rf ${OKD4_SNC_PATH}/okd4-install-dir
 mkdir -p ${OKD4_SNC_PATH}/okd4-install-dir
 cp ${OKD4_SNC_PATH}/install-config-snc.yaml ${OKD4_SNC_PATH}/okd4-install-dir/install-config.yaml
-OKD_VER=$(echo $OKD_RELEASE | sed  "s|4.4.0-0.okd|4.4|g")
+OKD_VER=$(echo $OKD_RELEASE | sed  "s|4.6.0-0.okd|4.6|g")
 sed -i "s|%%OKD_VER%%|${OKD_VER}|g" ${OKD4_SNC_PATH}/okd4-install-dir/install-config.yaml
 openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir create ignition-configs
 

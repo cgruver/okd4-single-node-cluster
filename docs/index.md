@@ -2,9 +2,9 @@
 
 ## Host setup:
 
-You need to start with a minimal CentOS 8 install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
+You need to start with a minimal CentOS Stream install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
 
-Download the minimal install ISO from: http://isoredirect.centos.org/centos/8/isos/x86_64/
+Download the minimal install ISO from: http://isoredirect.centos.org/centos/8-stream/isos/x86_64/
 
 Use a tool like [balenaEtcher](https://www.balena.io/etcher/) to create a bootable USB key from a CentOS ISO.
 
@@ -38,7 +38,7 @@ Install packages and set up KVM:
 
 Create an SSH key pair: (Take the defaults for all of the prompts, don't set a key passphrase)
 
-    ssh-keygen -N "" -f id_rsa
+    ssh-keygen -N "" -f /root/.ssh/id_rsa
 
 Update and shutdown the SNC host:
 
@@ -244,7 +244,7 @@ Create the directory structure for the Fedora CoreOS install files.
 
     mkdir -p /usr/share/nginx/html/install/fcos/ignition
 
-## Prepare to Install the OKD 4.4 Single Node Cluster
+## Prepare to Install the OKD 4.6 Single Node Cluster
 
 I have provided a set of utility scripts to automate a lot of the tasks associated with deploying and tearing down an your OKD cluster.  In your `~/bin` directory you will see the following:
 
@@ -253,21 +253,21 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 | `DeployOkdSnc.sh` | Creates the Bootstrap and Master nodes, and starts the installation |
 | `DestroyBootstrap.sh` | Destroys the Bootstrap node |
 | `sncPostInstall.sh` | Post cluster install script to set up the cluster for use |
-| `UnDeployOkdSnc.sh` | Destroys the single node cluster |
+| `UnDeploySncNode.sh` | Destroys the single node cluster |
 
 1. Retrieve the `oc` command.  We're going to grab an older version of `oc`, but that's OK.  We just need it to retrieve to current versions of `oc` and `openshift-install`
 
-    Go to: `https://github.com/openshift/okd/releases/tag/4.5.0-0.okd-2020-09-04-180756` and retrieve the `openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz` archive.
+    Go to: `https://github.com/openshift/okd/releases/tag/4.6.0-0.okd-2021-01-23-132511` and retrieve the `openshift-client-linux-4.6.0-0.okd-2021-01-23-132511.tar.gz` archive.
 
        cd ${OKD4_SNC_PATH}
-       wget https://github.com/openshift/okd/releases/download/4.5.0-0.okd-2020-09-04-180756/openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz
+       wget https://github.com/openshift/okd/releases/download/4.6.0-0.okd-2021-01-23-132511/openshift-client-linux-4.6.0-0.okd-2021-01-23-132511.tar.gz
 
 1. Uncompress the archive and move the `oc` executable to your ~/bin directory.
 
-       tar -xzf openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz
+       tar -xzf openshift-client-linux-4.6.0-0.okd-2021-01-23-132511.tar.gz
        mv oc ~/bin
        mv kubectl ~/bin
-       rm -f openshift-client-linux-4.5.0-0.okd-2020-09-04-180756.tar.gz
+       rm -f openshift-client-linux-4.6.0-0.okd-2021-01-23-132511.tar.gz
        rm -f README.md
 
     The `DeployOkdSnc.sh` script will pull the correct version of `oc` and `openshift-install` when we run it.  It will over-write older versions in `~/bin`.
@@ -276,9 +276,9 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
 
     ![OKD Release](images/OKD-Release.png)
 
-    Select the most recent 4.4.0-0.okd release from the `4-stable` stream that is in a Phase of `Accepted`, and copy the release name into an environment variable:
+    Select the most recent 4.6.0-0.okd release from the `4-stable` stream that is in a Phase of `Accepted`, and copy the release name into an environment variable:
 
-       export OKD_RELEASE=4.5.0-0.okd-2020-06-29-110348-beta6
+       export OKD_RELEASE=4.6.0-0.okd-2021-01-23-132511
 
 1. The next step is to prepare the install-config.yaml file that `openshift-install` will use it to create the `ignition` files for bootstrap and master nodes.
 
