@@ -38,7 +38,7 @@ Install packages and set up KVM:
 
 Create an SSH key pair: (Take the defaults for all of the prompts, don't set a key passphrase)
 
-    ssh-keygen -N "" -f /root/.ssh/id_rsa
+    ssh-keygen -t ecdsa -b 521 -N "" -f /root/.ssh/id_ecdsa_crc
 
 Update and shutdown the SNC host:
 
@@ -313,7 +313,7 @@ I have provided a set of utility scripts to automate a lot of the tasks associat
     Patch in some values:
 
         sed -i "s|%%SNC_DOMAIN%%|${SNC_DOMAIN}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
-        SSH_KEY=$(cat ~/.ssh/id_rsa.pub)
+        SSH_KEY=$(cat ~/.ssh/id_ecdsa_crc.pub)
         sed -i "s|%%SSH_KEY%%|${SSH_KEY}|g" ${OKD4_SNC_PATH}/install-config-snc.yaml
 
     Your install-config-snc.yaml file should now look something like:
