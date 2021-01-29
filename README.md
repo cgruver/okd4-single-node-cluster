@@ -1,13 +1,11 @@
 # okd4-single-node-cluster
 Building an OKD4 SIngle Node Cluster with minimal resources
 
-__Note: This has some untested patches to make it work with OKD 4.6 and FCOS 33.__   
-
-* Open an issue if you encounter any problems.  I will test a full run when I get some spare cycles.
+__Note: Open an issue if you encounter any problems.  I will try to help you resolve it__   
 
 This tutorial will guide you through deploying an OKD 4.4 cluster that is as minimal as possible.  It will consist of one node which is both master and worker.
 
-You will need a CentOS 8 linux host with 2 cores and at least 32GB of RAM.
+You will need a CentOS Streams linux host with 2 cores and at least 32GB of RAM.
 
 I am using a [NUC8i3BEK](https://ark.intel.com/content/www/us/en/ark/products/126149/intel-nuc-kit-nuc8i3bek.html) with 32GB of RAM for my host. This little box with 32GB of RAM is perfect for this purpose, and also very portable for throwing in a bag to take my dev environment with me.  Also check out the newer [NUC10i3FNK](https://ark.intel.com/content/www/us/en/ark/products/195503/intel-nuc-10-performance-kit-nuc10i3fnk.html).  It will support 64GB of RAM!
 
