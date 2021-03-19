@@ -9,18 +9,16 @@
     IN      NS     snc-host.%%SNC_DOMAIN%%.
 
 ; name servers - A records
-snc-host.%%SNC_DOMAIN%%.         IN      A      10.11.11.10
+snc-host.%%SNC_DOMAIN%%.         IN      A      %%SNC_HOST%%
 
-; 10.11.11.0/24 - A records
-okd4-snc-bootstrap.%%SNC_DOMAIN%%.  IN      A      10.11.11.49
-okd4-snc-master.%%SNC_DOMAIN%%.     IN      A      10.11.11.50
-etcd-0.okd4-snc.%%SNC_DOMAIN%%.              IN      A      10.11.11.50
-*.apps.okd4-snc.%%SNC_DOMAIN%%.     IN      A      10.11.11.50
-api.okd4-snc.%%SNC_DOMAIN%%.        IN      A      10.11.11.49 ; remove-after-bootstrap
-api.okd4-snc.%%SNC_DOMAIN%%.        IN      A      10.11.11.50
-api-int.okd4-snc.%%SNC_DOMAIN%%.    IN      A      10.11.11.49 ; remove-after-bootstrap
-api-int.okd4-snc.%%SNC_DOMAIN%%.    IN      A      10.11.11.50
+; %%SNC_NETWORK%% - A records
+okd4-snc-bootstrap.%%SNC_DOMAIN%%.  IN      A      %%BOOTSTRAP_HOST%%
+okd4-snc-master.%%SNC_DOMAIN%%.     IN      A      %%MASTER_HOST%%
+etcd-0.okd4-snc.%%SNC_DOMAIN%%.              IN      A      %%MASTER_HOST%%
+*.apps.okd4-snc.%%SNC_DOMAIN%%.     IN      A      %%MASTER_HOST%%
+api.okd4-snc.%%SNC_DOMAIN%%.        IN      A      %%BOOTSTRAP_HOST%% ; remove-after-bootstrap
+api.okd4-snc.%%SNC_DOMAIN%%.        IN      A      %%MASTER_HOST%%
+api-int.okd4-snc.%%SNC_DOMAIN%%.    IN      A      %%BOOTSTRAP_HOST%% ; remove-after-bootstrap
+api-int.okd4-snc.%%SNC_DOMAIN%%.    IN      A      %%MASTER_HOST%%
 
 _etcd-server-ssl._tcp.okd4-snc.%%SNC_DOMAIN%%    86400     IN    SRV     0    10    2380    etcd-0.okd4-snc.%%SNC_DOMAIN%%.
-
-

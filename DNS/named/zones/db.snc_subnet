@@ -9,6 +9,6 @@
       IN      NS      snc-host.%%SNC_DOMAIN%%.
 
 ; PTR Records
-10    IN      PTR     snc-host.%%SNC_DOMAIN%%.
-49    IN      PTR     okd4-snc-bootstrap.%%SNC_DOMAIN%%.
-50    IN      PTR     okd4-snc-master.%%SNC_DOMAIN%%. 
+%%SNC_HOST%%    IN      PTR     snc-host.%%SNC_DOMAIN%%.
+%%BOOTSTRAP_HOST%%    IN      PTR     okd4-snc-bootstrap.%%SNC_DOMAIN%%.
+%%MASTER_HOST%%    IN      PTR     okd4-snc-master.%%SNC_DOMAIN%%. 

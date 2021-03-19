@@ -3,8 +3,7 @@ zone "%%SNC_DOMAIN%%" {
     file "/etc/named/zones/db.%%SNC_DOMAIN%%"; # zone file path
 };
 
-zone "11.11.10.in-addr.arpa" {
+zone "%%SNC_ARPA%%.in-addr.arpa" {
     type master;
-    file "/etc/named/zones/db.10.11.11";
+    file "/etc/named/zones/db.snc_subnet";
 };
-
