@@ -1,6 +1,6 @@
-# OKD 4 Single Node Cluster
+# __OKD 4 Single Node Cluster__
 
-## Host setup:
+### ___Host setup:___
 
 You need to start with a minimal CentOS Stream, Fedora, or CentO-8 install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
 
@@ -66,7 +66,7 @@ Create an SSH key pair: (Take the defaults for all of the prompts, don't set a k
 ssh-keygen -t ed25519 -N "" -f /root/.ssh/id_ed25519
 ```
 
-### __Network Bridge:__
+### ___Network Bridge:___
 
 Next, we need to set your host up for bridged networking so that your single node cluster will have an IP address that you can access on your local network.
 
@@ -145,7 +145,7 @@ dnf -y update && shutdown -h now
 
 Disconnect the keyboard, mouse, and display.  Your host is now headless.  
 
-### __Power the host up, log in via SSH, and continue the snc-host host set up.__
+### ___Power the host up, log in via SSH, and continue the snc-host host set up.___
 
 Clone this repository:
 
@@ -198,7 +198,7 @@ Now, set the environment in your local shell:
 . /root/bin/setSncEnv.sh
 ```
 
-### __DNS Configuration:__
+### ___DNS Configuration:___
 
 OKD requires a DNS configuration.  To satisfy that requirement, we will set up bind. 
 __Do not do this on a system already configured for DNS.  This will destroy your current configuration.__ 
@@ -256,7 +256,7 @@ Now let's talk about this configuration, starting with the A records, (forward l
     api-int.okd4-snc.your.domain.org.    IN      A      10.10.11.149 ; remove after bootstrap
     ```
 
-### __Hugely Helpful Tip:__
+### ___Hugely Helpful Tip:___
 
 __If you are using a MacBook for your workstation, you can enable DNS resolution to your lab by creating a file in the `/etc/resolver` directory on your Mac.__
 
@@ -276,7 +276,7 @@ Save the file.
 
 Your MacBook should now query your new DNS server for entries in your new domain.  __Note:__ If your MacBook is on a different network and is routed to your Lab network, then the `acl` entry in your DNS configuration must allow your external network to query.  Otherwise, you will bang your head wondering why it does not work...
 
-### __Prepare to Install the OKD 4.7 Single Node Cluster__
+### ___Prepare to Install the OKD 4.7 Single Node Cluster___
 
 I have provided a set of utility scripts to automate a lot of the tasks associated with deploying and tearing down an your OKD cluster.  In your `~/bin` directory you will see the following:
 
@@ -385,7 +385,7 @@ pullSecret: '{"auths":{"fake":{"auth": "Zm9vOmJhcgo="}}}'
 sshKey: ssh-ed25519 AAAAC3NREDACTED1xwuiuVigoq root@snc-host
 ```
 
-### __Installation of our Single Node Cluster__
+### ___Installation of our Single Node Cluster___
 
 Create the cluster virtual machines and start the OKD installation:
 
@@ -433,7 +433,7 @@ virsh start okd4-snc-bootstrap
 virsh start okd4-snc-master
 ```
 
-### __Now let's sit back and watch the install:__
+### ___Now let's sit back and watch the install:___
 
 In a separate terminal, execute the following to monitor the Bootstrap progress:
 
@@ -445,27 +445,83 @@ You will see output similar to:
 
 ```bash
 DEBUG OpenShift Installer 4.7.0-0.okd-2021-03-07-090821 
-DEBUG Built from commit 4cb9ca89c59cbc7e5b4caf3863e098057b496a15 
+DEBUG Built from commit a005bb9eddcbc97e4cac2cdf4436fe2d524cc75e 
 INFO Waiting up to 20m0s for the Kubernetes API at https://api.okd4-snc.snc.test:6443... 
+DEBUG Still waiting for the Kubernetes API: Get "https://api.okd4-snc.snc.test:6443/version?timeout=32s": dial tcp 10.11.11.150:6443: i/o timeout 
+DEBUG Still waiting for the Kubernetes API: Get "https://api.okd4-snc.snc.test:6443/version?timeout=32s": dial tcp 10.11.11.149:6443: connect: connection refused 
 ```
 
 __This will take a while, be patient.__
 
-__If you want to watch something happening, see "Watching Bootstrap and Install processes in more detail" below.__
+### ___Patch `etcd` for Single Node Configuration:___
+
+__When you see the following:__
+
+```bash
+INFO API v1.20.0-1046+5fbfd197c16d3c-dirty up     
+INFO Waiting up to 30m0s for bootstrapping to complete... 
+```
+
+We need to apply a configuration patch to `etcd`
+
+Execute the following until you see that the `etcd` configuration is created:
+
+```bash
+export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
+oc get etcd cluster
+```
+
+You will see output similat to:
+
+```bash
+[root@snc-host ~]# oc get etcd cluster
+error: the server doesn't have a resource type "etcd"
+```
+
+```bash
+[root@snc-host ~]# oc get etcd cluster
+NAME      AGE
+cluster   4m33s
+```
+
+When `etcd` is configured, run the following to patch the config:
 
 ```bash
 oc patch etcd cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableEtcd": true}}}' --type=merge
-oc patch IngressController default -n openshift-ingress-operator -p='{"spec": {"replicas": 1}}' --type=merge
-oc patch authentications.operator.openshift.io cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableOAuthServer": true }}}' --type=merge
 ```
 
-When the Bootstrap process is complete, destroy the Bootstrap node.
+__If you want to watch something happening, see "Watching Bootstrap and Install processes in more detail" below.__
+
+When the Bootstrap process is complete, you will see the following:
+
+```bash
+DEBUG Bootstrap status: complete                   
+INFO It is now safe to remove the bootstrap resources 
+DEBUG Time elapsed per stage:                      
+DEBUG Bootstrap Complete: 14m9s                    
+DEBUG                API: 3m56s                    
+INFO Time elapsed: 14m9s                   
+```
+
+Now, destroy the Bootstrap node.
 
 ```bash
 DestroyBootstrap.sh
 ```
 
-Now, watch the installation process through to completion:
+### ___Patch operators for Single Node Configuration:___
+
+We need to patch two of the operators for the install to complete successfully:
+
+```bash
+export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
+oc patch IngressController default -n openshift-ingress-operator -p='{"spec": {"replicas": 1}}' --type=merge
+oc patch authentications.operator.openshift.io cluster -p='{"spec": {"unsupportedConfigOverrides": {"useUnsupportedUnsafeNonHANonProductionUnstableOAuthServer": true }}}' --type=merge
+```
+
+### ___Complete the install___
+
+Watch the installation process through to completion:
 
 ```bash
 openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for install-complete --log-level debug
@@ -474,95 +530,141 @@ openshift-install --dir=${OKD4_SNC_PATH}/okd4-install-dir wait-for install-compl
 You will see output similar to:
 
 ```bash
-INFO Waiting up to 30m0s for the cluster at https://api.okd4-snc.snc.test:6443 to initialize... 
-DEBUG Still waiting for the cluster to initialize: Working towards 4.4.0-0.okd-2020-05-11-020031: 76% complete 
+DEBUG OpenShift Installer 4.7.0-0.okd-2021-03-07-090821 
+DEBUG Built from commit a005bb9eddcbc97e4cac2cdf4436fe2d524cc75e 
+DEBUG Loading Install Config...                    
+DEBUG   Loading SSH Key...                         
+DEBUG   Loading Base Domain...                     
+DEBUG     Loading Platform...                      
+DEBUG   Loading Cluster Name...                    
+DEBUG     Loading Base Domain...                   
+DEBUG     Loading Platform...                      
+DEBUG   Loading Networking...                      
+DEBUG     Loading Platform...                      
+DEBUG   Loading Pull Secret...                     
+DEBUG   Loading Platform...                        
+DEBUG Using Install Config loaded from state file  
+INFO Waiting up to 40m0s for the cluster at https://api.okd4-snc.snc.test:6443 to initialize... 
+DEBUG Still waiting for the cluster to initialize: Working towards 4.7.0-0.okd-2021-03-07-090821: 38 of 669 done (5% complete) 
+DEBUG Still waiting for the cluster to initialize: Working towards 4.7.0-0.okd-2021-03-07-090821: 413 of 669 done (61% complete) 
 ```
 
-### Watching Bootstrap and Install processes in more detail:
+### ___Install Complete:___
+
+You will see output that looks like:
+
+```bash
+DEBUG Cluster is initialized                       
+INFO Waiting up to 10m0s for the openshift-console route to be created... 
+DEBUG Route found in openshift-console namespace: console 
+DEBUG OpenShift console route is admitted          
+INFO Install complete!                            
+INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/root/okd4-snc/okd4-install-dir/auth/kubeconfig' 
+INFO Access the OpenShift web-console here: https://console-openshift-console.apps.okd4-snc.snc.test 
+INFO Login to the console with user: "kubeadmin", and password: "pYQmG-UIttv-LEs5Y-7NZmf" 
+DEBUG Time elapsed per stage:                      
+DEBUG Cluster Operators: 7m3s                      
+INFO Time elapsed: 7m3s 
+```
+
+### Log into your new cluster console:
+
+Point your browser to the url listed at the completion of install: `https://console-openshift-console.apps.okd4-snc.snc.test`
+Log in as `kubeadmin` with the password from the output at the completion of the install.
+
+__If you forget the password for this initial account, you can find it in the file: `${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password`
+
+### ___Issue commands against your new cluster:___
+
+```bash
+export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
+oc get pods --all-namespaces
+```
+
+### ___Set up htpasswd Authentication:___
+
+Create an htpasswd file with two users.  The `user` admin will be assigned the password that was created when you installed your cluster.  The user `devuser` will be assigned the password `devpwd`.  THe user `devuser` will have default permissions.
+
+```bash
+mkdir -p ${OKD4_SNC_PATH}/okd-creds
+htpasswd -B -c -b ${OKD4_SNC_PATH}/okd-creds/htpasswd admin $(cat ${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password)
+htpasswd -b ${OKD4_SNC_PATH}/okd-creds/htpasswd devuser devpwd
+```
+
+Now, create a Secret with this htpasswd file:
+
+```bash
+oc create -n openshift-config secret generic htpasswd-secret --from-file=htpasswd=${OKD4_SNC_PATH}/okd-creds/htpasswd
+```
+
+Create the Htpasswd Identity Provider:
+
+I have provided an Identity Provider custom resource configuration located at `./htpasswd-cr.yaml` in this project.
+
+```bash
+oc apply -f ${OKD4_SNC_PATH}/okd4-single-node-cluster/htpasswd-cr.yaml
+```
+
+Make the user `admin` a Cluster Administrator:
+
+```bash
+oc adm policy add-cluster-role-to-user cluster-admin admin
+```
+
+Now, log into the web console as your new admin user to verify access.  Select the `Htpasswd` provider when you log in.
+
+Finally, remove temporary user:
+
+```bash
+oc delete secrets kubeadmin -n kube-system
+```
+
+### ___Create an Empty volume for registry storage:___
+
+```bash
+oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
+```
+
+### ___Configure the Image Pruner:___
+
+```bash
+oc patch imagepruners.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"schedule":"0 0 * * *","suspend":false,"keepTagRevisions":3,"keepYoungerThan":60,"resources":{},"affinity":{},"nodeSelector":{},"tolerations":[],"startingDeadlineSeconds":60,"successfulJobsHistoryLimit":3,"failedJobsHistoryLimit":3}}'
+```
+
+### __Watching Bootstrap and Install processes in more detail:__
 
 To watch a node boot and install:
 
 * Bootstrap node:
-  
-       virsh console okd4-snc-bootstrap
+
+    ```bash
+    virsh console okd4-snc-bootstrap
+    ```
 
 * Master Node:
 
-       virsh console okd4-snc-master
+    ```bash
+    virsh console okd4-snc-master
+    ```
 
 Once a host has installed FCOS you can monitor the install logs:
 
 * Bootstrap Node:
 
-       ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-bootstrap "journalctl -b -f -u bootkube.service"
+    ```bash
+    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-bootstrap "journalctl -b -f -u release-image.service -u bootkube.service"
+    ```
 
 * Master Node:
 
-       ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-master "journalctl -b -f -u kubelet.service"
+    ```bash
+    ssh -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null core@okd4-snc-master "journalctl -b -f -u kubelet.service"
+    ````
 
 ### If it all goes pancake shaped during the install:
 
 Gather logs from the bootstrap and master nodes:
 
-    openshift-install --dir=okd4-install gather bootstrap --bootstrap 10.11.11.49 --master 10.11.11.50
-
-## Install Complete:
-
-    You will see output that looks like:
-
-      INFO Waiting up to 10m0s for the openshift-console route to be created... 
-      DEBUG Route found in openshift-console namespace: console 
-      DEBUG Route found in openshift-console namespace: downloads 
-      DEBUG OpenShift console route is created           
-      INFO Install complete!                            
-      INFO To access the cluster as the system:admin user when using 'oc', run 'export KUBECONFIG=/root/okd4-snc/okd4-install-dir/auth/kubeconfig' 
-      INFO Access the OpenShift web-console here: https://console-openshift-console.apps.okd4-snc.your.domain.org 
-      INFO Login to the console with user: kubeadmin, password: aBCdE-FGHiJ-klMNO-PqrSt
-
-### Log into your new cluster console:
-
-Point your browser to the url listed at the completion of install: `https://console-openshift-console.apps.okd4-snc.your.domain.org`
-Log in as `kubeadmin` with the password from the output at the completion of the install.
-
-__If you forget the password for this initial account, you can find it in the file: `${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password`
-
-### Issue commands against your new cluster:
-
-    export KUBECONFIG="${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeconfig"
-    oc get pods --all-namespaces
-
-## Set up htpasswd Authentication:
-
-1. Create an htpasswd file with two users.  The `user` admin will be assigned the password that was created when you installed your cluster.  The user `devuser` will be assigned the password `devpwd`.  THe user `devuser` will have default permissions.
-
-       mkdir -p ${OKD4_SNC_PATH}/okd-creds
-       htpasswd -B -c -b ${OKD4_SNC_PATH}/okd-creds/htpasswd admin $(cat ${OKD4_SNC_PATH}/okd4-install-dir/auth/kubeadmin-password)
-       htpasswd -b ${OKD4_SNC_PATH}/okd-creds/htpasswd devuser devpwd
-
-1. Now, create a Secret with this htpasswd file:
-
-       oc create -n openshift-config secret generic htpasswd-secret --from-file=htpasswd=${OKD4_SNC_PATH}/okd-creds/htpasswd
-
-1. Create the Htpasswd Identity Provider:
-
-    I have provided an Identity Provider custom resource configuration located at `./htpasswd-cr.yaml` in this project.
-
-       oc apply -f ${OKD4_SNC_PATH}/okd4-single-node-cluster/htpasswd-cr.yaml
-
-1. Make the user `admin` a Cluster Administrator:
-
-       oc adm policy add-cluster-role-to-user cluster-admin admin
-
-1. Now, log into the web console as your new admin user to verify access.  Select the `Htpasswd` provider when you log in.
-
-1. Finally, remove temporary user:
-
-       oc delete secrets kubeadmin -n kube-system
-
-### Create an Empty volume for registry storage:
-
-    oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"managementState":"Managed","storage":{"emptyDir":{}}}}'
-
-### Configure the Image Pruner:
-
-    oc patch imagepruners.imageregistry.operator.openshift.io/cluster --type merge -p '{"spec":{"schedule":"0 0 * * *","suspend":false,"keepTagRevisions":3,"keepYoungerThan":60,"resources":{},"affinity":{},"nodeSelector":{},"tolerations":[],"startingDeadlineSeconds":60,"successfulJobsHistoryLimit":3,"failedJobsHistoryLimit":3}}'
+```bash
+openshift-install --dir=okd4-install gather bootstrap --bootstrap 10.11.11.149 --master 10.11.11.150
+```
