@@ -5,5 +5,5 @@ zone "%%SNC_DOMAIN%%" {
 
 zone "%%SNC_ARPA%%.in-addr.arpa" {
     type master;
-    file "/etc/named/zones/db.snc_subnet";
+    file "/etc/named/zones/db.snc_ptr";
 };
