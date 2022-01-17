@@ -1,9 +1,14 @@
 # okd4-single-node-cluster
 Building an OKD4 SIngle Node Cluster with minimal resources
 
-__Note: Look for an update soon.__  I'm going to move this over to my new Blog: [https://upstreamwithoutapaddle.com](https://upstreamwithoutapaddle.com)
+__Note: This project is being deprecated.__   
 
-__Note: Open an issue if you encounter any problems.  I will try to help you resolve it__   
+I'm moving this over to my Blog: [https://upstreamwithoutapaddle.com](https://upstreamwithoutapaddle.com)
+
+The new post is here: [https://upstreamwithoutapaddle.com/blog%20post/2022/01/16/Let-It-Sno.html](https://upstreamwithoutapaddle.com/blog%20post/2022/01/16/Let-It-Sno.html)
+
+
+__This project will no longer be maintained.  I will move it to an archive soon.__
 
 This tutorial will guide you through deploying an OKD 4.7 cluster that is as minimal as possible.  It will consist of one node which is both master and worker.
 
