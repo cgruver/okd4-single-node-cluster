@@ -1,5 +1,14 @@
 # __OKD 4 Single Node Cluster__
 
+__Note: This project is being deprecated.__   
+
+I'm moving this over to my Blog: [https://upstreamwithoutapaddle.com](https://upstreamwithoutapaddle.com)
+
+The new post is here: [https://upstreamwithoutapaddle.com/blog%20post/2022/01/16/Let-It-Sno.html](https://upstreamwithoutapaddle.com/blog%20post/2022/01/16/Let-It-Sno.html)
+
+
+__This project will no longer be maintained.  I will move it to an archive soon.__
+
 ### ___Host setup:___
 
 You need to start with a minimal CentOS Stream, Fedora, or CentO-8 install. (__This tutorial assumes that you are comfortable installing a Linux OS.__)
