@@ -1,13 +1,13 @@
 # __OKD 4 Single Node Cluster__
 
-__Note: This project deprecated.__   
+__Note: This project is deprecated.__   
 
 I've moved this over to my Blog: [https://upstreamwithoutapaddle.com](https://upstreamwithoutapaddle.com)
 
 The new post is here: [https://upstreamwithoutapaddle.com/blog%20post/2023/03/06/Back-To-Where-It-All-Started.html](https://upstreamwithoutapaddle.com/blog%20post/2023/03/06/Back-To-Where-It-All-Started.html)
 
 
-__This project will no longer be maintained.  I will move it to an archive soon.__
+__This project is no longer maintained.  See the link above for an updated guide.__
 
 ### ___Host setup:___
 
